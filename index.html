@@ -46,14 +46,15 @@
         .reset-btn { font-size: 0.75rem; background: #9ca3af; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; margin-right: 10px; transition: 0.3s; }
         .reset-btn:hover { background: #6b7280; }
 
-        /* تنسيق الملاحظات المطور */
-        .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
-        .note-text { margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; }
+        /* الملاحظات */
+        .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .note-text { margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
         .note-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; }
         .note-btn { font-size: 0.75rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
         .edit-area { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--primary); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
 
         .hidden { display: none !important; }
+        .link { color: var(--primary); cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -61,7 +62,7 @@
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <header>
-    <div id="ham" class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <div id="ham" class="menu-toggle" onclick="toggleMenu()" style="display:block;">☰</div>
     <div style="font-weight: 900; color: var(--primary); font-size: 1.2rem;">PRO DASHBOARD</div>
     <div onclick="toggleDark()" style="cursor:pointer; font-size: 24px;">🌓</div>
 </header>
@@ -81,7 +82,7 @@
             <input type="password" id="passIn" placeholder="كلمة المرور">
             <button class="btn" id="mainAuthBtn" onclick="handleAuth()">دخول</button>
             <div style="text-align: center; margin-top:15px;">
-                <span class="link" onclick="toggleAuthMode()" id="toggleLink" style="color: var(--primary); cursor: pointer; font-weight: bold;">إنشاء حساب جديد</span>
+                <span class="link" onclick="toggleAuthMode()" id="toggleLink">إنشاء حساب جديد</span>
             </div>
         </div>
     </div>
@@ -90,7 +91,7 @@
         <div id="homeSec" class="section active">
             <div class="card">
                 <h3>➕ إضافة عداد جديد</h3>
-                <input type="text" id="newCName" placeholder="اسم العداد (مثل: صلاة على النبي)">
+                <input type="text" id="newCName" placeholder="اسم العداد">
                 <input type="number" id="newCTarget" placeholder="الهدف (اختياري)">
                 <button class="btn" onclick="addCounter()">حفظ العداد</button>
             </div>
@@ -161,7 +162,6 @@
     function loginSuccess() {
         document.getElementById('authArea').classList.add('hidden');
         document.getElementById('mainContent').classList.remove('hidden');
-        document.getElementById('ham').style.display = 'block';
         render();
     }
 
@@ -183,10 +183,7 @@
     }
 
     function resetCounter(i) {
-        if(confirm("هل تريد تصفير هذا العداد؟")) {
-            user.counters[i].count = 0;
-            save();
-        }
+        if(confirm("تصفير العداد؟")) { user.counters[i].count = 0; save(); }
     }
 
     function deleteCounter(i) {
@@ -203,7 +200,6 @@
         }
     }
 
-    // وظائف الملاحظات الجديدة
     function deleteNote(id) {
         if(confirm("حذف الملاحظة؟")) {
             user.notes = user.notes.filter(n => n.id !== id);
@@ -237,6 +233,13 @@
         }
     }
 
+    // الدالة المسؤولة عن منع تحول الملاحظة لكود
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     function render() {
         if(!user) return;
         
@@ -245,16 +248,13 @@
         user.counters.forEach((c, i) => {
             const isReached = c.target > 0 && c.count >= c.target;
             const remaining = c.target - c.count;
-            let statusHtml = '';
-            if (c.target > 0) {
-                statusHtml = isReached ? '🌟 تم الوصول للهدف!' : `باقي لك ${remaining} لتصل للهدف`;
-            }
+            let statusHtml = c.target > 0 ? (isReached ? '🌟 تم الوصول!' : `باقي لك ${remaining}`) : '';
 
             cl.innerHTML += `
             <div class="counter-row ${isReached ? 'reached' : ''}">
                 <div class="c-header">
                     <div>
-                        <span style="font-weight:900;">${c.name}</span>
+                        <span style="font-weight:900;">${escapeHtml(c.name)}</span>
                         <button class="reset-btn" onclick="resetCounter(${i})">تصفير 🔄</button>
                     </div>
                     <span style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</span>
@@ -265,27 +265,28 @@
                         <span style="font-weight:bold; font-size:1.8rem; min-width:60px; text-align:center;">${c.count}</span>
                         <button class="m-btn" onclick="updateCounter(${i}, -1)" ${c.count <= 0 ? 'disabled' : ''}>-</button>
                     </div>
-                    <div style="text-align:left;">
-                        <div style="font-size:0.7rem; color:#888;">الهدف: ${c.target || 'بلا'}</div>
-                    </div>
+                    <div style="font-size:0.7rem; color:#888;">الهدف: ${c.target || 'بلا'}</div>
                 </div>
                 <div class="remaining-text">${statusHtml}</div>
             </div>`;
         });
 
-        // رندر الملاحظات المطور
+        // رندر الملاحظات مع حماية النصوص
         const nl = document.getElementById('nList'); nl.innerHTML = "";
         (user.notes || []).forEach(n => {
+            // تحويل النص ليكون نصاً آمناً لا يتحول لـ HTML
+            const safeText = escapeHtml(n.txt);
+            
             nl.innerHTML += `
             <div class="note-bubble">
-                <div id="text-${n.id}" class="note-text">${n.txt}</div>
+                <div id="text-${n.id}" class="note-text">${safeText}</div>
                 <div id="actions-${n.id}" class="note-actions">
-                    <span class="note-btn" onclick="copyNote(\`${n.txt}\`)">نسخ 📋</span>
+                    <span class="note-btn" onclick="copyNote(\`${safeText}\`)">نسخ 📋</span>
                     <span class="note-btn" onclick="enableEdit('${n.id}')">تعديل ✏️</span>
                     <span class="note-btn" style="color:#ef4444;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
                 </div>
                 <div id="edit-ctrl-${n.id}" class="hidden">
-                    <textarea id="input-${n.id}" class="edit-area" rows="3">${n.txt}</textarea>
+                    <textarea id="input-${n.id}" class="edit-area" rows="3">${safeText}</textarea>
                     <button class="btn" style="padding:8px;" onclick="saveEdit('${n.id}')">حفظ التعديل</button>
                 </div>
             </div>`;
