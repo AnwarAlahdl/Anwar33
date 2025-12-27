@@ -6,7 +6,7 @@
     <title>برو داشبورد | أنور</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --success: #10b981; }
+        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --success: #10b981; --danger: #ef4444; }
         [data-theme="light"] { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --border: #ddd; }
         
         body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; }
@@ -17,8 +17,15 @@
         .sidebar.open { right: 0; }
         .sidebar-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; font-weight: bold; }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 2400; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2400; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
+
+        /* ستايل النافذة المنبثقة المخصصة */
+        .custom-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--card); padding: 25px; border-radius: 20px; z-index: 3000; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; opacity: 0; transition: 0.3s; border: 1px solid var(--border); }
+        .custom-modal.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
+        .m-confirm { background: var(--danger); color: white; border: none; padding: 10px; flex: 1; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .m-cancel { background: var(--border); color: var(--text); border: none; padding: 10px; flex: 1; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
         .section { display: none; width: 95%; max-width: 500px; margin: 20px auto; }
         .section.active { display: block; }
@@ -48,7 +55,15 @@
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="overlay" id="overlay" onclick="closeModal()"></div>
+<div class="custom-modal" id="customModal">
+    <h3 id="modalTitle">تأكيد الحذف</h3>
+    <p id="modalMsg">هل أنت متأكد من رغبتك في الحذف؟</p>
+    <div class="modal-btns">
+        <button class="m-confirm" id="modalConfirmBtn">نعم، حذف</button>
+        <button class="m-cancel" onclick="closeModal()">إلغاء</button>
+    </div>
+</div>
 
 <header>
     <div id="ham" class="menu-toggle" onclick="toggleMenu()">☰</div>
@@ -107,10 +122,30 @@
 
 <script>
     let user = null;
+    let pendingAction = null; // لتخزين الوظيفة التي ستنفذ عند التأكيد
 
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('show');
+    }
+
+    // وظائف النافذة المنبثقة المخصصة
+    function showModal(title, msg, onConfirm) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalMsg').innerText = msg;
+        document.getElementById('overlay').classList.add('show');
+        document.getElementById('customModal').classList.add('show');
+        
+        document.getElementById('modalConfirmBtn').onclick = function() {
+            onConfirm();
+            closeModal();
+        };
+    }
+
+    function closeModal() {
+        document.getElementById('overlay').classList.remove('show');
+        document.getElementById('customModal').classList.remove('show');
+        document.getElementById('sidebar').classList.remove('open');
     }
 
     function toggleDark() {
@@ -121,7 +156,7 @@
     function showTab(t) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(t + 'Sec').classList.add('active');
-        if (document.getElementById('sidebar').classList.contains('open')) toggleMenu();
+        if (document.getElementById('sidebar').classList.contains('open')) closeModal();
     }
 
     function toggleAuthMode() {
@@ -181,11 +216,17 @@
     }
 
     function resetCounter(i) {
-        if(confirm("تصفير العداد؟")) { user.counters[i].count = 0; save(); }
+        showModal("تصفير العداد", "هل تريد إعادة العداد إلى صفر؟", () => {
+            user.counters[i].count = 0;
+            save();
+        });
     }
 
     function deleteCounter(i) {
-        if(confirm("حذف العداد؟")) { user.counters.splice(i, 1); save(); }
+        showModal("حذف العداد", "سيتم حذف العداد نهائياً، هل أنت متأكد؟", () => {
+            user.counters.splice(i, 1);
+            save();
+        });
     }
 
     function addNote() {
@@ -199,10 +240,10 @@
     }
 
     function deleteNote(id) {
-        if(confirm("حذف الملاحظة؟")) {
+        showModal("حذف الملاحظة", "هل تريد حذف هذه الملاحظة؟", () => {
             user.notes = user.notes.filter(n => n.id !== id);
             save();
-        }
+        });
     }
 
     function copyNote(txt) {
@@ -233,7 +274,6 @@
     function render() {
         if(!user) return;
         
-        // رندر العدادات
         const cl = document.getElementById('cList'); cl.innerHTML = "";
         user.counters.forEach((c, i) => {
             const isReached = c.target > 0 && c.count >= c.target;
@@ -260,11 +300,10 @@
                     ${c.target > 0 ? (isReached ? '🌟 تم الوصول!' : 'باقي لك ' + (c.target - c.count)) : ''}
                 </div>
             `;
-            row.querySelector('.c-name').textContent = c.name; // حقن النص كـ Text
+            row.querySelector('.c-name').textContent = c.name;
             cl.appendChild(row);
         });
 
-        // رندر الملاحظات - الحماية القصوى
         const nl = document.getElementById('nList'); nl.innerHTML = "";
         (user.notes || []).forEach(n => {
             const bubble = document.createElement('div');
@@ -283,12 +322,9 @@
                     <button class="btn" style="padding:8px;" onclick="saveEdit('${n.id}')">حفظ التعديل</button>
                 </div>
             `;
-            
-            // حقن النصوص كنص مجرد (Text Content) لمنع تشغيل أي كود
             bubble.querySelector(`#content-${n.id}`).textContent = n.txt;
             bubble.querySelector(`#input-${n.id}`).value = n.txt;
             bubble.querySelector('.copy-btn').onclick = () => copyNote(n.txt);
-            
             nl.appendChild(bubble);
         });
     }
