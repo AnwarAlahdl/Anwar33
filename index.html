@@ -25,12 +25,15 @@
         .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
         
         /* العدادات */
-        .counter-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 5px solid var(--primary); }
+        .counter-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 5px solid var(--primary); transition: 0.3s; }
+        .counter-row:hover { transform: translateX(-5px); }
         .c-controls { display: flex; align-items: center; gap: 10px; }
-        .m-btn { width: 40px; height: 40px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+        .m-btn { width: 40px; height: 40px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: 0.1s; }
+        .m-btn:active { transform: scale(0.9); }
         .m-btn:disabled { opacity: 0.3; }
         
         /* الملاحظات */
@@ -41,6 +44,10 @@
 
         .hidden { display: none !important; }
         .link { color: var(--primary); cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+
+        /* ستايل الإحصائيات */
+        .stat-box { background: var(--bg); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        .stat-val { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -94,6 +101,15 @@
 
     <div id="settingsSec" class="section">
         <div class="card">
+            <h3>📊 إحصائياتي</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+                <div class="stat-box"><small>إجمالي النقرات</small><div id="totalClicks" class="stat-val">0</div></div>
+                <div class="stat-box"><small>الملاحظات</small><div id="totalNotes" class="stat-val">0</div></div>
+            </div>
+            <button class="btn" onclick="exportNotes()" style="background: #10b981;">📥 تحميل الملاحظات (TXT)</button>
+        </div>
+
+        <div class="card">
             <h3>⚙️ إعدادات الحساب</h3>
             <input type="text" id="set_nm" placeholder="اليوزر الجديد">
             <button class="btn" onclick="updateSetting('nm')">تحديث اليوزر</button>
@@ -125,6 +141,7 @@
         if(t === 'settings' && user) {
             document.getElementById('set_nm').value = user.nm;
             document.getElementById('set_em').value = user.em || "";
+            updateStats();
         }
         if (document.getElementById('sidebar').classList.contains('open')) toggleMenu();
     }
@@ -177,7 +194,6 @@
         if(confirm("حذف العداد؟")) { user.counters.splice(i, 1); save(); }
     }
 
-    // وظيفة إضافة الملاحظات (المصلحة)
     function addNote() {
         const txt = document.getElementById('noteIn').value.trim();
         if(txt) {
@@ -204,17 +220,36 @@
         }
     }
 
+    function updateStats() {
+        if (!user) return;
+        const total = user.counters.reduce((sum, c) => sum + c.count, 0);
+        const notesCount = user.notes ? user.notes.length : 0;
+        document.getElementById('totalClicks').innerText = total;
+        document.getElementById('totalNotes').innerText = notesCount;
+    }
+
+    function exportNotes() {
+        if (!user.notes || user.notes.length === 0) return alert("لا توجد ملاحظات");
+        let content = `ملاحظات: ${user.nm}\n----------------\n\n`;
+        user.notes.forEach((n, i) => content += `${i+1}- ${n.txt}\n\n`);
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'notes.txt';
+        a.click();
+    }
+
     function save() {
         if(user) {
             localStorage.setItem('u_'+user.nm, JSON.stringify(user));
             render();
+            updateStats();
         }
     }
 
     function render() {
         if(!user) return;
         
-        // رندر العدادات
         const cl = document.getElementById('cList'); cl.innerHTML = "";
         user.counters.forEach((c, i) => {
             cl.innerHTML += `<div class="counter-row">
@@ -228,7 +263,6 @@
             </div>`;
         });
 
-        // رندر الملاحظات
         const nl = document.getElementById('nList'); nl.innerHTML = "";
         const notesToShow = user.notes || [];
         notesToShow.forEach(n => {
@@ -245,7 +279,7 @@
 
     function copyText(t) {
         navigator.clipboard.writeText(t);
-        alert('تم النسخ بنجاح');
+        alert('تم النسخ');
     }
 
     function logout() { location.reload(); }
