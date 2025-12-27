@@ -3,379 +3,343 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>برو داشبورد | أنور</title>
+    <title>نظام أنور المتكامل | PRO</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --primary: #6366f1; --text: #ffffff; --border: #334155; --success: #10b981; --danger: #ef4444; }
-        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); margin: 0; overflow-x: hidden; }
+        :root { --bg: #0f172a; --card: #1e293b; --primary: #6366f1; --text: #f8fafc; --border: #334155; --success: #10b981; --danger: #ef4444; }
+        body { font-family: 'Cairo', sans-serif; background: var(--bg); color: var(--text); margin: 0; transition: 0.3s; }
         
-        /* الهيدر والقائمة */
-        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border); }
-        .nav-menu { position: fixed; bottom: 0; width: 100%; background: var(--card); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid var(--border); z-index: 1000; }
-        .nav-item { cursor: pointer; font-size: 0.8rem; text-align: center; opacity: 0.7; }
-        .nav-item.active { opacity: 1; color: var(--primary); font-weight: bold; }
+        /* الهيدر والقائمة الجانبية */
+        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
+        .hamburger { font-size: 28px; cursor: pointer; color: var(--primary); display: none; }
+        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--card); transition: 0.4s ease; z-index: 2000; padding-top: 60px; box-shadow: -10px 0 20px rgba(0,0,0,0.5); }
+        .sidebar.open { right: 0; }
+        .sidebar-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .sidebar-item:hover { background: rgba(99, 102, 241, 0.1); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 1500; backdrop-filter: blur(3px); }
 
-        .container { width: 95%; max-width: 600px; margin: 20px auto; padding-bottom: 80px; }
+        .container { width: 95%; max-width: 600px; margin: 20px auto; padding-bottom: 50px; }
         .section { display: none; }
-        .section.active { display: block; animation: fadeIn 0.3s; }
+        .section.active { display: block; animation: slideIn 0.3s ease-out; }
 
         /* الكروت والمدخلات */
-        .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid var(--border); background: #f8fafc; color: #1e293b; font-family: 'Cairo'; box-sizing: border-box; }
-        .btn { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 10px 15px rgba(0,0,0,0.2); }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid var(--border); background: #f1f5f9; color: #1e293b; font-family: 'Cairo'; box-sizing: border-box; font-weight: bold; }
+        .btn { width: 100%; padding: 14px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 1rem; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-danger { background: var(--danger); color: white; }
 
-        /* العدادات - سطر فيه 2 */
-        .counters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .counter-item { background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid var(--border); text-align: center; position: relative; }
+        /* العدادات - 2 في السطر */
+        .counters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .counter-item { background: var(--card); padding: 15px; border-radius: 20px; border: 2px solid var(--border); text-align: center; position: relative; transition: 0.3s; }
         .counter-item.completed { border-color: var(--success); background: rgba(16, 185, 129, 0.1); }
-        .counter-btns { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 10px 0; }
-        .c-btn { width: 35px; height: 35px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
-        .goal-info { font-size: 0.7rem; color: #94a3b8; margin-top: 5px; }
+        .c-btns { display: flex; justify-content: center; align-items: center; gap: 8px; margin: 10px 0; }
+        .c-btn { width: 35px; height: 35px; border-radius: 10px; border: none; font-weight: 900; cursor: pointer; }
+        .goal-info { font-size: 0.75rem; color: #94a3b8; min-height: 35px; }
 
-        /* الملاحظات */
-        .note-card { background: var(--card); border: 1px solid var(--border); padding: 15px; border-radius: 15px; margin-bottom: 10px; }
-        .note-text { white-space: pre-wrap; word-break: break-all; font-size: 0.9rem; margin-bottom: 10px; }
-        .note-actions { display: flex; gap: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
-        .n-btn { font-size: 0.7rem; cursor: pointer; padding: 5px 10px; background: var(--bg); border-radius: 5px; border: 1px solid var(--border); }
+        /* جداول الإحصائيات */
+        .stat-group { background: var(--card); border-radius: 15px; border: 1px solid var(--border); margin-bottom: 20px; overflow: hidden; }
+        .stat-header { padding: 10px 15px; background: rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: center; font-size: 0.9rem; }
+        th { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
 
-        /* الأنميشن والمنبثقات */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .modal-content { background: var(--card); padding: 25px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; }
+        /* المنبثقة الاحترافية */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 3000; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: 25px; width: 85%; max-width: 350px; text-align: center; border: 1px solid var(--border); }
 
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
 <div class="modal" id="confirmModal">
     <div class="modal-content">
-        <h3 id="modalTitle">تأكيد</h3>
-        <p id="modalMsg"></p>
-        <div style="display: flex; gap: 10px;">
-            <button class="btn btn-danger" id="modalConfirm">نعم</button>
-            <button class="btn btn-primary" style="background:#64748b" onclick="closeModal()">إلغاء</button>
+        <h3 id="mTitle" style="margin-top:0">تأكيد الحذف</h3>
+        <p id="mMsg" style="opacity:0.8"></p>
+        <div style="display: flex; gap: 10px; margin-top:20px">
+            <button class="btn btn-danger" id="mConfirm">نعم، حذف</button>
+            <button class="btn" style="background:#475569; color:white" onclick="closeModal()">إلغاء</button>
         </div>
     </div>
 </div>
 
 <header>
-    <div style="font-weight: 900; color: var(--primary);">PRO DASHBOARD</div>
-    <div id="userInfoHeader" class="hidden" style="font-size: 0.8rem;"></div>
+    <div id="hamBtn" class="hamburger" onclick="toggleSidebar()">☰</div>
+    <div style="font-weight: 900; color: var(--primary); font-size: 1.3rem;">PRO DASHBOARD</div>
+    <div style="width: 30px;"></div>
 </header>
+
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-item" onclick="nav('counter')">📊 صفحة العداد</div>
+    <div class="sidebar-item" onclick="nav('notes')">📝 الملاحظات</div>
+    <div class="sidebar-item" onclick="nav('stats')">📈 الإحصائيات</div>
+    <div class="sidebar-item" onclick="nav('settings')">⚙️ الإعدادات</div>
+    <div class="sidebar-item" style="color:var(--danger); border-top:1px solid var(--border); margin-top:30px" onclick="logout()">🚪 تسجيل الخروج</div>
+</nav>
 
 <div class="container">
     
     <div id="authPage" class="section active">
         <div class="card" id="loginBox">
             <h2 style="text-align: center;">تسجيل الدخول</h2>
-            <input type="text" id="loginId" placeholder="اليوزر نيم أو الإيميل">
-            <input type="password" id="loginPass" placeholder="كلمة المرور">
-            <label style="font-size: 0.8rem;"><input type="checkbox" id="rememberMe"> تذكر معلوماتي</label>
-            <button class="btn btn-primary" onclick="tryLogin()">دخول</button>
-            <p onclick="showRegister()" style="text-align: center; cursor: pointer; font-size: 0.8rem; color: var(--primary);">إنشاء حساب جديد</p>
-            <p onclick="forgotPass()" style="text-align: center; cursor: pointer; font-size: 0.8rem; opacity: 0.7;">نسيت كلمة المرور؟</p>
+            <input type="text" id="lId" placeholder="اليوزر نيم أو الإيميل">
+            <input type="password" id="lPass" placeholder="كلمة المرور">
+            <label style="font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="remMe" style="width:auto"> تذكر معلومات تسجيل الدخول
+            </label>
+            <button class="btn btn-primary" style="margin-top:15px" onclick="tryLogin()">دخول</button>
+            <button class="btn" style="background:none; color:var(--primary); margin-top:10px" onclick="toggleAuth(true)">إنشاء حساب جديد</button>
+            <p onclick="forgotPass()" style="text-align: center; cursor: pointer; font-size: 0.8rem; opacity: 0.6;">نسيت كلمة المرور؟</p>
         </div>
 
-        <div class="card hidden" id="registerBox">
-            <h2 style="text-align: center;">حساب جديد</h2>
-            <input type="text" id="regUser" placeholder="اليوزر نيم">
-            <input type="email" id="regEmail" placeholder="الإيميل">
-            <input type="password" id="regPass" placeholder="كلمة المرور">
-            <input type="password" id="regPassConfirm" placeholder="تأكيد كلمة المرور">
-            <button class="btn btn-primary" onclick="handleRegister()">تسجيل</button>
-            <p onclick="showLogin()" style="text-align: center; cursor: pointer;">لديك حساب؟ دخول</p>
+        <div class="card hidden" id="regBox">
+            <h2 style="text-align: center;">إنشاء حساب</h2>
+            <input type="text" id="rU" placeholder="اليوزر نيم">
+            <input type="email" id="rE" placeholder="الإيميل">
+            <input type="password" id="rP" placeholder="كلمة المرور">
+            <input type="password" id="rPC" placeholder="تأكيد كلمة المرور">
+            <button class="btn btn-primary" onclick="handleReg()">تسجيل الحساب</button>
+            <button class="btn" style="background:none; color:var(--text)" onclick="toggleAuth(false)">رجوع لتسجيل الدخول</button>
         </div>
     </div>
 
     <div id="twoFAPage" class="section">
         <div class="card" style="text-align: center;">
             <h2>التحقق بخطوتين 🛡️</h2>
-            <p>أدخل الرمز التالي للمتابعة:</p>
-            <h1 id="captchaDisplay" style="letter-spacing: 10px; color: var(--primary);">ABCD</h1>
-            <input type="text" id="captchaInput" placeholder="اكتب الرمز هنا">
-            <button class="btn btn-primary" onclick="verify2FA()">تأكيد</button>
+            <p style="opacity:0.7">أدخل الرمز التالي للمتابعة:</p>
+            <div id="captchaCode" style="font-size: 2.5rem; font-weight: 900; letter-spacing: 10px; color: var(--primary); margin: 20px 0; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 15px;"></div>
+            <input type="text" id="captchaIn" placeholder="أدخل الرمز هنا" style="text-align:center; font-size:1.2rem">
+            <button class="btn btn-primary" onclick="verify2FA()">تحقق ودخول</button>
         </div>
     </div>
 
     <div id="counterPage" class="section">
-        <div class="card">
-            <h3>➕ إضافة عداد</h3>
-            <input type="text" id="cName" placeholder="اسم العداد">
-            <input type="number" id="cGoal" placeholder="الهدف الرقمي">
-            <button class="btn btn-primary" onclick="addCounter()">إضافة العداد</button>
+        <div class="card" style="text-align: center;">
+            <h3 style="margin-top:0">إضافة عداد جديد</h3>
+            <input type="text" id="cn" placeholder="اسم العداد (مثلاً: ريبورتات)">
+            <input type="number" id="cg" placeholder="الهدف اليومي (مثلاً: 100)">
+            <button class="btn btn-primary" onclick="addCounter()">+ إضافة</button>
         </div>
-        <div class="counters-grid" id="countersContainer"></div>
-        <button class="btn btn-primary" style="margin-top:20px; background:#10b981" onclick="transferData()">نقل البيانات للإحصائيات ➡️</button>
+        <div class="counters-grid" id="cList"></div>
+        <button class="btn btn-primary" style="margin-top:25px; background:var(--success)" onclick="transferData()">نقل البيانات للإحصائيات ➡️</button>
     </div>
 
     <div id="notesPage" class="section">
         <div class="card">
-            <h3>📝 ملاحظة جديدة</h3>
-            <textarea id="noteIn" placeholder="اكتب ملاحظتك هنا (لن يتم قراءة الأكواد)..."></textarea>
-            <button class="btn btn-primary" onclick="addNote()">إضافة الملاحظة</button>
+            <h3 style="margin-top:0">ملاحظة جديدة</h3>
+            <textarea id="ntIn" placeholder="اكتب ملاحظتك هنا... (سيتم حفظها كـ نص فقط)" rows="4"></textarea>
+            <button class="btn btn-primary" onclick="addNote()">حفظ الملاحظة</button>
         </div>
-        <div id="notesContainer"></div>
+        <div id="nList"></div>
     </div>
 
     <div id="settingsPage" class="section">
         <div class="card">
-            <h3>👤 معلومات الحساب</h3>
-            <div id="currentAccountInfo" style="font-size: 0.9rem; line-height: 2;"></div>
-            <hr style="border: 0.5px solid var(--border); margin: 15px 0;">
-            <h3>🛠️ تعديل البيانات</h3>
-            <input type="text" id="editUser" placeholder="يوزر جديد">
-            <input type="text" id="edit2FA" placeholder="الرمز المخصص لـ 2FA">
-            <button class="btn btn-primary" onclick="updateSettings()">حفظ التعديلات</button>
-            <button class="btn btn-danger" style="margin-top: 10px;" onclick="deleteAccount()">حذف الحساب نهائياً</button>
+            <h3>معلومات الحساب</h3>
+            <div id="accInfo" style="background:rgba(0,0,0,0.2); padding:15px; border-radius:12px; font-size:0.9rem; margin-bottom:20px"></div>
+            <h3>تعديل البيانات</h3>
+            <input type="text" id="eU" placeholder="اليوزر نيم الجديد">
+            <input type="email" id="eE" placeholder="الإيميل الجديد">
+            <input type="password" id="eP" placeholder="كلمة مرور جديدة">
+            <input type="text" id="eS" placeholder="الرمز المخصص لـ 2FA">
+            <button class="btn btn-primary" onclick="saveSets()">حفظ التعديلات</button>
+            <hr style="border:0.5px solid var(--border); margin:25px 0">
+            <button class="btn btn-danger" onclick="askDelAcc()">حذف الحساب نهائياً</button>
         </div>
     </div>
 
     <div id="statsPage" class="section">
-        <div style="display:flex; justify-content: space-between; align-items: center;">
-            <h2>📊 الإحصائيات</h2>
-            <button class="n-btn" style="color:var(--danger)" onclick="clearStats()">حذف الكل</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px">
+            <h2 style="margin:0">📊 الإحصائيات</h2>
         </div>
-        <div id="statsContainer"></div>
+        <div id="sList"></div>
     </div>
 
 </div>
 
-<nav class="nav-menu hidden" id="bottomNav">
-    <div class="nav-item active" onclick="nav('counter')">📊 العداد</div>
-    <div class="nav-item" onclick="nav('notes')">📝 ملاحظات</div>
-    <div class="nav-item" onclick="nav('stats')">📈 إحصائيات</div>
-    <div class="nav-item" onclick="nav('settings')">⚙️ إعدادات</div>
-</nav>
-
 <script>
-    let users = JSON.parse(localStorage.getItem('users')) || {};
-    let currentUser = null;
-    let generatedCaptcha = "";
+    let users = JSON.parse(localStorage.getItem('pro_users')) || {};
+    let cur = null;
+    let code = "";
 
-    // وظائف التنقل
-    function nav(target) {
+    // إدارة الواجهات
+    function nav(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById(target + 'Page').classList.add('active');
-        event.currentTarget.classList.add('active');
-        if(target === 'stats') renderStats();
-        if(target === 'settings') renderSettings();
+        document.getElementById(id + 'Page').classList.add('active');
+        closeSidebar();
+        if(id === 'counter') renderCounters();
+        if(id === 'notes') renderNotes();
+        if(id === 'stats') renderStats();
+        if(id === 'settings') renderSettings();
     }
 
-    // 1. نظام الدخول والتسجيل
-    function showRegister() { document.getElementById('loginBox').classList.add('hidden'); document.getElementById('registerBox').classList.remove('hidden'); }
-    function showLogin() { document.getElementById('registerBox').classList.add('hidden'); document.getElementById('loginBox').classList.remove('hidden'); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').style.display = document.getElementById('sidebar').classList.contains('open') ? 'block' : 'none'; }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').style.display = 'none'; }
+    function toggleAuth(reg) { document.getElementById('loginBox').className = reg ? 'card hidden' : 'card'; document.getElementById('regBox').className = reg ? 'card' : 'card hidden'; }
 
-    function handleRegister() {
-        const u = document.getElementById('regUser').value, e = document.getElementById('regEmail').value, 
-              p = document.getElementById('regPass').value, cp = document.getElementById('regPassConfirm').value;
-        if(!u || !e || p !== cp) return alert("تأكد من البيانات وتطابق كلمة المرور");
-        if(users[u]) return alert("المستخدم موجود مسبقاً");
-        users[u] = { user: u, email: e, pass: p, custom2FA: "1234", counters: [], notes: [], stats: [] };
-        localStorage.setItem('users', JSON.stringify(users));
-        alert("تم التسجيل بنجاح"); showLogin();
+    // نظام الدخول والتسجيل
+    function handleReg() {
+        const u = document.getElementById('rU').value, e = document.getElementById('rE').value, p = document.getElementById('rP').value, pc = document.getElementById('rPC').value;
+        if(!u || !e || p !== pc) return alert("يرجى ملء الحقول وتطابق الباسوورد");
+        users[u] = { u, e, p, sec: "1234", counters: [], notes: [], stats: [] };
+        save(); alert("تم إنشاء الحساب"); toggleAuth(false);
     }
 
     function tryLogin() {
-        const id = document.getElementById('loginId').value, ps = document.getElementById('loginPass').value;
-        const found = Object.values(users).find(user => (user.user === id || user.email === id) && user.pass === ps);
-        if(found) {
-            currentUser = found;
-            start2FA();
-        } else alert("بيانات خاطئة");
-    }
-
-    // 2. نظام 2FA
-    function start2FA() {
-        document.getElementById('authPage').classList.remove('active');
-        document.getElementById('twoFAPage').classList.add('active');
-        generatedCaptcha = Math.random().toString(36).substring(2, 6).toUpperCase();
-        document.getElementById('captchaDisplay').innerText = generatedCaptcha;
+        const id = document.getElementById('lId').value, p = document.getElementById('lPass').value;
+        const user = Object.values(users).find(x => (x.u === id || x.e === id) && x.p === p);
+        if(user) { 
+            cur = user; 
+            nav('twoFA'); 
+            code = Math.random().toString(36).substring(2, 7).toUpperCase();
+            document.getElementById('captchaCode').innerText = code;
+        } else alert("بيانات الدخول غير صحيحة");
     }
 
     function verify2FA() {
-        if(document.getElementById('captchaInput').value.toUpperCase() === generatedCaptcha) {
-            loginSuccess();
+        if(document.getElementById('captchaIn').value.toUpperCase() === code) {
+            document.getElementById('hamBtn').style.display = 'block';
+            nav('counter');
         } else alert("الرمز غير صحيح");
     }
 
-    function loginSuccess() {
-        document.getElementById('twoFAPage').classList.remove('active');
-        document.getElementById('counterPage').classList.add('active');
-        document.getElementById('bottomNav').classList.remove('hidden');
-        document.getElementById('userInfoHeader').classList.remove('hidden');
-        document.getElementById('userInfoHeader').innerText = "أهلاً، " + currentUser.user;
-        renderCounters();
-        renderNotes();
-    }
+    function logout() { location.reload(); }
 
-    // 3. نظام العداد
+    // العدادات
     function addCounter() {
-        const name = document.getElementById('cName').value, goal = parseInt(document.getElementById('cGoal').value);
-        if(!name || !goal) return;
-        currentUser.counters.push({ name, goal, current: 0, id: Date.now() });
+        const n = document.getElementById('cn').value, g = parseInt(document.getElementById('cg').value);
+        if(!n || !g) return;
+        cur.counters.push({ id: Date.now(), n, g, c: 0 });
         save(); renderCounters();
+        document.getElementById('cn').value = ""; document.getElementById('cg').value = "";
     }
 
     function renderCounters() {
-        const container = document.getElementById('countersContainer');
+        const container = document.getElementById('cList');
         container.innerHTML = "";
-        currentUser.counters.forEach(c => {
-            const isDone = c.current >= c.goal;
-            const remaining = c.goal - c.current;
+        cur.counters.forEach(item => {
+            const isDone = item.c >= item.g;
             container.innerHTML += `
-                <div class="counter-item ${isDone ? 'completed' : ''}" id="card-${c.id}">
-                    <span style="position:absolute; top:5px; left:5px; cursor:pointer;" onclick="confirmDeleteCounter(${c.id})">🗑️</span>
-                    <div style="font-weight:bold">${c.name}</div>
-                    <div class="counter-btns">
-                        <button class="c-btn" style="background:var(--primary); color:white" onclick="updC(${c.id}, 1)">+</button>
-                        <span style="font-size:1.2rem; font-weight:900;">${c.current}</span>
-                        <button class="c-btn" style="background:#ddd" onclick="updC(${c.id}, -1)">-</button>
+                <div class="counter-item ${isDone ? 'completed' : ''}">
+                    <span style="position:absolute; top:8px; left:8px; cursor:pointer; font-size:12px;" onclick="askDelCounter(${item.id})">🗑️</span>
+                    <div style="font-weight:900">${item.n}</div>
+                    <div class="c-btns">
+                        <button class="c-btn" style="background:var(--primary); color:white" onclick="updC(${item.id}, 1)">+</button>
+                        <span style="font-size:1.4rem; font-weight:900; min-width:35px">${item.c}</span>
+                        <button class="c-btn" style="background:#f1f5f9" onclick="updC(${item.id}, -1)">-</button>
                     </div>
                     <div class="goal-info">
-                        ${isDone ? '<b style="color:var(--success)">تم إنجاز الهدف ✅</b>' : 'باقي لك ' + remaining + ' لإنجاز الهدف'}
+                        ${isDone ? '<b style="color:var(--success)">تم إنجاز الهدف ✅</b>' : 'باقي لك ' + (item.g - item.c) + ' للهدف'}
                     </div>
                 </div>
             `;
         });
     }
 
-    function updC(id, amt) {
-        const c = currentUser.counters.find(x => x.id === id);
-        c.current = Math.max(0, c.current + amt);
+    function updC(id, val) {
+        const i = cur.counters.find(x => x.id === id);
+        i.c = Math.max(0, i.c + val);
         save(); renderCounters();
     }
 
-    function confirmDeleteCounter(id) {
-        openModal("حذف العداد", "هل أنت متأكد من حذف هذا العداد؟", () => {
-            currentUser.counters = currentUser.counters.filter(x => x.id !== id);
-            save(); renderCounters(); closeModal();
-        });
-    }
-
     function transferData() {
-        currentUser.counters.forEach(c => {
-            currentUser.stats.unshift({ name: c.name, val: c.current, date: new Date().toLocaleString(), id: Date.now() });
-            c.current = 0;
-        });
-        save(); renderCounters(); alert("تم نقل البيانات للإحصائيات");
+        if(cur.counters.length === 0) return;
+        const entry = { id: Date.now(), date: new Date().toLocaleString(), name: "سجل جديد", data: cur.counters.map(x => ({ n: x.n, c: x.c })) };
+        cur.stats.unshift(entry);
+        cur.counters.forEach(x => x.c = 0);
+        save(); renderCounters(); alert("تم نقل البيانات للجداول");
     }
 
-    // 4. الملاحظات (نظام TXT آمن)
+    // الملاحظات
     function addNote() {
-        const txt = document.getElementById('noteIn').value;
-        if(!txt) return;
-        currentUser.notes.unshift({ text: txt, id: Date.now() });
-        save(); renderNotes(); document.getElementById('noteIn').value = "";
+        const t = document.getElementById('ntIn').value;
+        if(!t) return;
+        cur.notes.unshift({ id: Date.now(), t });
+        save(); renderNotes(); document.getElementById('ntIn').value = "";
     }
 
     function renderNotes() {
-        const container = document.getElementById('notesContainer');
+        const container = document.getElementById('nList');
         container.innerHTML = "";
-        currentUser.notes.forEach(n => {
+        cur.notes.forEach(n => {
             const div = document.createElement('div');
-            div.className = 'note-card';
-            const textDiv = document.createElement('div');
-            textDiv.className = 'note-text';
-            textDiv.textContent = n.text; // قراءة كـ TXT وليس كـ HTML
-            
-            div.appendChild(textDiv);
+            div.className = 'card';
+            div.style.padding = '15px';
+            const p = document.createElement('pre'); // استخدام pre لضمان قراءة النص كـ TXT
+            p.textContent = n.t;
+            p.style.whiteSpace = "pre-wrap";
+            p.style.fontFamily = "Cairo";
+            div.appendChild(p);
             div.innerHTML += `
-                <div class="note-actions">
-                    <span class="n-btn" onclick="copyNote('${n.id}')">📋 نسخ</span>
-                    <span class="n-btn" onclick="editNote('${n.id}')">✏️ تعديل</span>
-                    <span class="n-btn" style="color:var(--danger)" onclick="deleteNote('${n.id}')">🗑️ حذف</span>
+                <div style="display:flex; gap:10px; margin-top:15px; border-top:1px solid var(--border); padding-top:10px">
+                    <button class="btn" style="padding:5px; font-size:12px" onclick="copyNote(\`${n.t.replace(/`/g, "\\`")}\`)">نسخ</button>
+                    <button class="btn" style="padding:5px; font-size:12px" onclick="editNote(${n.id})">تعديل</button>
+                    <button class="btn btn-danger" style="padding:5px; font-size:12px" onclick="askDelNote(${n.id})">حذف</button>
                 </div>
             `;
             container.appendChild(div);
         });
     }
 
-    function deleteNote(id) {
-        currentUser.notes = currentUser.notes.filter(x => x.id != id);
-        save(); renderNotes();
-    }
-
-    function copyNote(id) {
-        const n = currentUser.notes.find(x => x.id == id);
-        navigator.clipboard.writeText(n.text);
-        alert("تم النسخ للمحافظة");
-    }
-
-    function editNote(id) {
-        const n = currentUser.notes.find(x => x.id == id);
-        const newTxt = prompt("تعديل الملاحظة:", n.text);
-        if(newTxt) { n.text = newTxt; save(); renderNotes(); }
-    }
-
-    // 6. الإحصائيات
+    // الإحصائيات
     function renderStats() {
-        const container = document.getElementById('statsContainer');
+        const container = document.getElementById('sList');
         container.innerHTML = "";
-        currentUser.stats.forEach(s => {
+        cur.stats.forEach(s => {
+            let rows = s.data.map(d => `<tr><td>${d.n}</td><td>${d.c}</td></tr>`).join("");
             container.innerHTML += `
-                <div class="card" style="display:flex; justify-content:space-between; align-items:center; padding:10px 15px;">
-                    <div>
-                        <b id="statName-${s.id}">${s.name}</b>: ${s.val}
-                        <div style="font-size:0.6rem; opacity:0.5;">${s.date}</div>
+                <div class="stat-group">
+                    <div class="stat-header">
+                        <span style="font-weight:bold; font-size:0.8rem">${s.name} - ${s.date}</span>
+                        <div>
+                            <span onclick="editStat(${s.id})" style="cursor:pointer; margin-left:10px">✏️</span>
+                            <span onclick="askDelStat(${s.id})" style="cursor:pointer; color:var(--danger)">🗑️</span>
+                        </div>
                     </div>
-                    <div>
-                        <span onclick="editStatName(${s.id})" style="cursor:pointer; margin-left:10px;">✏️</span>
-                    </div>
+                    <table>
+                        <thead><tr><th>القسم</th><th>العدد</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
                 </div>
             `;
         });
     }
 
-    function editStatName(id) {
-        const s = currentUser.stats.find(x => x.id == id);
-        const newName = prompt("اسم جديد للإحصائية:", s.name);
-        if(newName) { s.name = newName; save(); renderStats(); }
-    }
-
-    function clearStats() {
-        if(confirm("حذف كل الإحصائيات؟")) { currentUser.stats = []; save(); renderStats(); }
-    }
-
     // الإعدادات
     function renderSettings() {
-        document.getElementById('currentAccountInfo').innerHTML = `
-            <b>اليوزر:</b> ${currentUser.user}<br>
-            <b>الإيميل:</b> ${currentUser.email}<br>
-            <b>رمز 2FA المخصص:</b> ${currentUser.custom2FA}
-        `;
+        document.getElementById('accInfo').innerHTML = `اليوزر: ${cur.u} <br> الإيميل: ${cur.e} <br> رمز 2FA: ${cur.sec}`;
     }
 
-    function updateSettings() {
-        const newUser = document.getElementById('editUser').value;
-        const new2FA = document.getElementById('edit2FA').value;
-        if(newUser) currentUser.user = newUser;
-        if(new2FA) currentUser.custom2FA = new2FA;
+    function saveSets() {
+        const u = document.getElementById('eU').value, e = document.getElementById('eE').value, p = document.getElementById('eP').value, s = document.getElementById('eS').value;
+        if(u) cur.u = u; if(e) cur.e = e; if(p) cur.p = p; if(s) cur.sec = s;
         save(); alert("تم التحديث"); renderSettings();
     }
 
-    function deleteAccount() {
-        if(confirm("هل أنت متأكد من حذف الحساب نهائياً؟ لا يمكن التراجع!")) {
-            delete users[currentUser.user];
-            localStorage.setItem('users', JSON.stringify(users));
-            location.reload();
-        }
-    }
-
-    // دوال عامة
-    function save() { users[currentUser.user] = currentUser; localStorage.setItem('users', JSON.stringify(users)); }
-    
+    // وظائف الحذف والتأكيد (Modals)
     function openModal(title, msg, onConfirm) {
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalMsg').innerText = msg;
+        document.getElementById('mTitle').innerText = title;
+        document.getElementById('mMsg').innerText = msg;
         document.getElementById('confirmModal').style.display = 'flex';
-        document.getElementById('modalConfirm').onclick = onConfirm;
+        document.getElementById('mConfirm').onclick = onConfirm;
     }
     function closeModal() { document.getElementById('confirmModal').style.display = 'none'; }
 
+    function askDelCounter(id) { openModal("حذف عداد", "هل أنت متأكد من حذف هذا العداد؟", () => { cur.counters = cur.counters.filter(x => x.id !== id); save(); renderCounters(); closeModal(); }); }
+    function askDelNote(id) { openModal("حذف ملاحظة", "هل تريد حذف هذه الملاحظة نهائياً؟", () => { cur.notes = cur.notes.filter(x => x.id !== id); save(); renderNotes(); closeModal(); }); }
+    function askDelStat(id) { openModal("حذف جدول", "هل تريد مسح هذا السجل من الإحصائيات؟", () => { cur.stats = cur.stats.filter(x => x.id !== id); save(); renderStats(); closeModal(); }); }
+    function askDelAcc() { openModal("حذف الحساب", "تحذير! سيتم حذف حسابك وكل بياناتك نهائياً.", () => { delete users[cur.u]; localStorage.setItem('pro_users', JSON.stringify(users)); location.reload(); }); }
+
+    // دوال مساعدة
+    function save() { users[cur.u] = cur; localStorage.setItem('pro_users', JSON.stringify(users)); }
+    function copyNote(t) { navigator.clipboard.writeText(t); alert("تم النسخ!"); }
+    function editNote(id) { const n = cur.notes.find(x => x.id === id); const nt = prompt("تعديل الملاحظة:", n.t); if(nt) { n.t = nt; save(); renderNotes(); } }
+    function editStat(id) { const s = cur.stats.find(x => x.id === id); const nt = prompt("تعديل اسم الجدول:", s.name); if(nt) { s.name = nt; save(); renderStats(); } }
+    function forgotPass() { alert("تواصل مع الإدارة أو استخدم رمز 2FA المخصص لك لإعادة التعيين."); }
 </script>
 </body>
 </html>
