@@ -6,7 +6,7 @@
     <title>برو داشبورد | أنور</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; }
+        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --success: #10b981; }
         [data-theme="light"] { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --border: #ddd; }
         
         body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; }
@@ -28,26 +28,28 @@
         .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
         
-        /* العدادات */
-        .counter-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 5px solid var(--primary); transition: 0.3s; }
-        .counter-row:hover { transform: translateX(-5px); }
+        /* العدادات المحدثة بنظام التارقت */
+        .counter-row { display: flex; flex-direction: column; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 5px solid var(--primary); transition: 0.3s; }
+        .counter-row.reached { border-right-color: var(--success); background: rgba(16, 185, 129, 0.05); border-color: var(--success); }
+        
+        .c-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .c-main { display: flex; justify-content: space-between; align-items: center; }
         .c-controls { display: flex; align-items: center; gap: 10px; }
-        .m-btn { width: 40px; height: 40px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: 0.1s; }
+        
+        .m-btn { width: 45px; height: 45px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 12px; font-size: 1.5rem; font-weight: bold; cursor: pointer; transition: 0.1s; }
         .m-btn:active { transform: scale(0.9); }
         .m-btn:disabled { opacity: 0.3; }
-        
-        /* الملاحظات */
+
+        .target-label { font-size: 0.75rem; color: #888; margin-top: 5px; }
+
+        /* الملاحظات والإحصائيات */
         .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .note-text { margin-bottom: 10px; white-space: pre-wrap; line-height: 1.6; }
-        .note-actions { display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 10px; }
         .note-btn { font-size: 0.8rem; cursor: pointer; padding: 5px 10px; border-radius: 5px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+        .stat-box { background: var(--bg); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        .stat-val { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
 
         .hidden { display: none !important; }
         .link { color: var(--primary); cursor: pointer; font-weight: bold; font-size: 0.85rem; }
-
-        /* ستايل الإحصائيات */
-        .stat-box { background: var(--bg); padding: 10px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
-        .stat-val { font-weight: 900; color: var(--primary); font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -84,8 +86,10 @@
 <div id="appArea" class="hidden">
     <div id="homeSec" class="section">
         <div class="card">
-            <input type="text" id="newCName" placeholder="اسم العداد الجديد...">
-            <button class="btn" onclick="addCounter()">+ إضافة عداد</button>
+            <h3>➕ إضافة عداد جديد</h3>
+            <input type="text" id="newCName" placeholder="اسم العداد (مثلاً: تسبيح)">
+            <input type="number" id="newCTarget" placeholder="الهدف (اختياري، مثلاً: 100)">
+            <button class="btn" onclick="addCounter()">حفظ العداد</button>
         </div>
         <div id="cList"></div>
     </div>
@@ -101,7 +105,7 @@
 
     <div id="settingsSec" class="section">
         <div class="card">
-            <h3>📊 إحصائياتي</h3>
+            <h3>📊 إحصائيات عامة</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
                 <div class="stat-box"><small>إجمالي النقرات</small><div id="totalClicks" class="stat-val">0</div></div>
                 <div class="stat-box"><small>الملاحظات</small><div id="totalNotes" class="stat-val">0</div></div>
@@ -113,8 +117,6 @@
             <h3>⚙️ إعدادات الحساب</h3>
             <input type="text" id="set_nm" placeholder="اليوزر الجديد">
             <button class="btn" onclick="updateSetting('nm')">تحديث اليوزر</button>
-            <input type="email" id="set_em" placeholder="الإيميل الجديد">
-            <button class="btn" onclick="updateSetting('em')">تحديث الإيميل</button>
             <input type="password" id="set_ps" placeholder="الباسوورد الجديد">
             <button class="btn" onclick="updateSetting('ps')">تحديث الباسوورد</button>
         </div>
@@ -140,7 +142,6 @@
         document.getElementById(t + 'Sec').classList.add('active');
         if(t === 'settings' && user) {
             document.getElementById('set_nm').value = user.nm;
-            document.getElementById('set_em').value = user.em || "";
             updateStats();
         }
         if (document.getElementById('sidebar').classList.contains('open')) toggleMenu();
@@ -156,14 +157,13 @@
     function handleAuth() {
         const nm = document.getElementById('userIn').value.trim();
         const ps = document.getElementById('passIn').value.trim();
-        const em = document.getElementById('emailIn').value.trim();
         if(!nm || !ps) return alert("أكمل البيانات");
 
         if(isRegMode) {
             if(localStorage.getItem('u_'+nm)) return alert("اليوزر موجود");
-            user = { nm, ps, em, counters: [], notes: [] };
+            user = { nm, ps, counters: [], notes: [] };
             localStorage.setItem('u_'+nm, JSON.stringify(user));
-            alert("تم التسجيل! يمكنك الدخول الآن"); toggleAuthMode();
+            alert("تم التسجيل!"); toggleAuthMode();
         } else {
             let stored = JSON.parse(localStorage.getItem('u_'+nm));
             if(stored && stored.ps === ps) { user = stored; loginSuccess(); }
@@ -181,12 +181,23 @@
 
     function addCounter() {
         const name = document.getElementById('newCName').value;
-        if(name) { user.counters.push({ name, count: 0 }); save(); document.getElementById('newCName').value = ""; }
+        const target = parseInt(document.getElementById('newCTarget').value) || 0;
+        if(name) { 
+            user.counters.push({ name, count: 0, target: target }); 
+            save(); 
+            document.getElementById('newCName').value = "";
+            document.getElementById('newCTarget').value = "";
+        }
     }
 
     function updateCounter(i, amt) {
         if(amt === -1 && user.counters[i].count <= 0) return;
         user.counters[i].count += amt;
+        
+        // تأثير بسيط عند الوصول للتارقت
+        if(user.counters[i].target > 0 && user.counters[i].count === user.counters[i].target) {
+            if(window.navigator.vibrate) window.navigator.vibrate([100, 50, 100]);
+        }
         save();
     }
 
@@ -211,32 +222,11 @@
         }
     }
 
-    function editNote(id) {
-        const note = user.notes.find(n => n.id === id);
-        const newTxt = prompt("تعديل الملاحظة:", note.txt);
-        if(newTxt !== null && newTxt.trim() !== "") {
-            note.txt = newTxt;
-            save();
-        }
-    }
-
     function updateStats() {
         if (!user) return;
         const total = user.counters.reduce((sum, c) => sum + c.count, 0);
-        const notesCount = user.notes ? user.notes.length : 0;
         document.getElementById('totalClicks').innerText = total;
-        document.getElementById('totalNotes').innerText = notesCount;
-    }
-
-    function exportNotes() {
-        if (!user.notes || user.notes.length === 0) return alert("لا توجد ملاحظات");
-        let content = `ملاحظات: ${user.nm}\n----------------\n\n`;
-        user.notes.forEach((n, i) => content += `${i+1}- ${n.txt}\n\n`);
-        const blob = new Blob([content], { type: 'text/plain' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'notes.txt';
-        a.click();
+        document.getElementById('totalNotes').innerText = user.notes ? user.notes.length : 0;
     }
 
     function save() {
@@ -252,34 +242,36 @@
         
         const cl = document.getElementById('cList'); cl.innerHTML = "";
         user.counters.forEach((c, i) => {
-            cl.innerHTML += `<div class="counter-row">
-                <div style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</div>
-                <div style="font-weight:bold; flex:1; text-align:right; margin-right:15px;">${c.name}</div>
-                <div class="c-controls">
-                    <button class="m-btn" onclick="updateCounter(${i}, 1)">+</button>
-                    <span style="font-weight:bold; font-size:1.3rem; min-width:30px; text-align:center;">${c.count}</span>
-                    <button class="m-btn" onclick="updateCounter(${i}, -1)" ${c.count <= 0 ? 'disabled' : ''}>-</button>
+            const isReached = c.target > 0 && c.count >= c.target;
+            cl.innerHTML += `
+            <div class="counter-row ${isReached ? 'reached' : ''}">
+                <div class="c-header">
+                    <span style="font-weight:900; font-size:1.1rem;">${c.name} ${isReached ? '✅' : ''}</span>
+                    <span style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</span>
+                </div>
+                <div class="c-main">
+                    <div class="c-controls">
+                        <button class="m-btn" onclick="updateCounter(${i}, 1)" style="background:var(--primary); color:white; border:none;">+</button>
+                        <span style="font-weight:bold; font-size:1.8rem; min-width:50px; text-align:center;">${c.count}</span>
+                        <button class="m-btn" onclick="updateCounter(${i}, -1)" ${c.count <= 0 ? 'disabled' : ''}>-</button>
+                    </div>
+                    <div style="text-align:left;">
+                        <div class="target-label">الهدف: ${c.target > 0 ? c.target : 'بلا'}</div>
+                    </div>
                 </div>
             </div>`;
         });
 
         const nl = document.getElementById('nList'); nl.innerHTML = "";
-        const notesToShow = user.notes || [];
-        notesToShow.forEach(n => {
+        (user.notes || []).forEach(n => {
             nl.innerHTML += `<div class="note-bubble">
                 <div class="note-text">${n.txt}</div>
                 <div class="note-actions">
-                    <span class="note-btn" onclick="copyText(\`${n.txt.replace(/`/g, '\\`')}\`)">نسخ 📋</span>
-                    <span class="note-btn" onclick="editNote(${n.id})">تعديل ✏️</span>
+                    <span class="note-btn" onclick="navigator.clipboard.writeText(\`${n.txt}\`); alert('تم النسخ');">نسخ 📋</span>
                     <span class="note-btn" style="color:red;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
                 </div>
             </div>`;
         });
-    }
-
-    function copyText(t) {
-        navigator.clipboard.writeText(t);
-        alert('تم النسخ');
     }
 
     function logout() { location.reload(); }
@@ -288,9 +280,18 @@
         const v = document.getElementById('set_'+type).value;
         if(!v) return;
         if(type === 'nm') { localStorage.removeItem('u_'+user.nm); user.nm = v; }
-        else if(type === 'em') user.em = v;
         else if(type === 'ps') user.ps = v;
         save(); alert("تم التحديث");
+    }
+
+    function exportNotes() {
+        let content = `ملاحظات أنور\n`;
+        user.notes.forEach((n, i) => content += `${i+1}- ${n.txt}\n`);
+        const blob = new Blob([content], { type: 'text/plain' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'notes.txt';
+        a.click();
     }
 
     function forgotPass() {
