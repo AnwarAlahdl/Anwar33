@@ -28,7 +28,7 @@
         .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         .btn:active { transform: scale(0.98); }
         
-        /* العدادات المحدثة */
+        /* العدادات */
         .counter-row { display: flex; flex-direction: column; background: var(--card); padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 6px solid var(--primary); transition: 0.3s; }
         .counter-row.reached { border-right-color: var(--success); background: rgba(16, 185, 129, 0.08); border-color: var(--success); }
         
@@ -45,6 +45,13 @@
 
         .reset-btn { font-size: 0.75rem; background: #9ca3af; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; margin-right: 10px; transition: 0.3s; }
         .reset-btn:hover { background: #6b7280; }
+
+        /* تنسيق الملاحظات المطور */
+        .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
+        .note-text { margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; }
+        .note-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; }
+        .note-btn { font-size: 0.75rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+        .edit-area { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--primary); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
 
         .hidden { display: none !important; }
     </style>
@@ -175,7 +182,6 @@
         save();
     }
 
-    // ميزة 2: تصفير العداد
     function resetCounter(i) {
         if(confirm("هل تريد تصفير هذا العداد؟")) {
             user.counters[i].count = 0;
@@ -197,6 +203,33 @@
         }
     }
 
+    // وظائف الملاحظات الجديدة
+    function deleteNote(id) {
+        if(confirm("حذف الملاحظة؟")) {
+            user.notes = user.notes.filter(n => n.id !== id);
+            save();
+        }
+    }
+
+    function copyNote(txt) {
+        navigator.clipboard.writeText(txt).then(() => alert("تم النسخ ✅"));
+    }
+
+    function enableEdit(id) {
+        document.getElementById(`text-${id}`).classList.add('hidden');
+        document.getElementById(`actions-${id}`).classList.add('hidden');
+        document.getElementById(`edit-ctrl-${id}`).classList.remove('hidden');
+    }
+
+    function saveEdit(id) {
+        const newTxt = document.getElementById(`input-${id}`).value.trim();
+        if(newTxt) {
+            const index = user.notes.findIndex(n => n.id == id);
+            user.notes[index].txt = newTxt;
+            save();
+        }
+    }
+
     function save() {
         if(user) {
             localStorage.setItem('u_'+user.nm, JSON.stringify(user));
@@ -206,12 +239,12 @@
 
     function render() {
         if(!user) return;
+        
+        // رندر العدادات
         const cl = document.getElementById('cList'); cl.innerHTML = "";
         user.counters.forEach((c, i) => {
             const isReached = c.target > 0 && c.count >= c.target;
             const remaining = c.target - c.count;
-            
-            // ميزة 1: نص "باقي لك"
             let statusHtml = '';
             if (c.target > 0) {
                 statusHtml = isReached ? '🌟 تم الوصول للهدف!' : `باقي لك ${remaining} لتصل للهدف`;
@@ -240,9 +273,22 @@
             </div>`;
         });
 
+        // رندر الملاحظات المطور
         const nl = document.getElementById('nList'); nl.innerHTML = "";
         (user.notes || []).forEach(n => {
-            nl.innerHTML += `<div class="card" style="margin-bottom:10px;">${n.txt}</div>`;
+            nl.innerHTML += `
+            <div class="note-bubble">
+                <div id="text-${n.id}" class="note-text">${n.txt}</div>
+                <div id="actions-${n.id}" class="note-actions">
+                    <span class="note-btn" onclick="copyNote(\`${n.txt}\`)">نسخ 📋</span>
+                    <span class="note-btn" onclick="enableEdit('${n.id}')">تعديل ✏️</span>
+                    <span class="note-btn" style="color:#ef4444;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
+                </div>
+                <div id="edit-ctrl-${n.id}" class="hidden">
+                    <textarea id="input-${n.id}" class="edit-area" rows="3">${n.txt}</textarea>
+                    <button class="btn" style="padding:8px;" onclick="saveEdit('${n.id}')">حفظ التعديل</button>
+                </div>
+            </div>`;
         });
     }
 
