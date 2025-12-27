@@ -6,13 +6,13 @@
     <title>برو داشبورد المطور | أنور</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --success: #10b981; --danger: #ef4444; }
+        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --danger: #ef4444; }
         [data-theme="light"] { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --border: #ddd; }
         
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; }
-        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 2000; height: 60px; box-sizing: border-box; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; }
+        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 2000; }
         
-        .menu-toggle { font-size: 24px; cursor: pointer; color: var(--primary); z-index: 2600; }
+        .menu-toggle { font-size: 24px; cursor: pointer; color: var(--primary); }
         .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--card); transition: 0.4s ease; z-index: 2500; padding-top: 70px; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
         .sidebar.open { right: 0; }
         .sidebar-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; font-weight: bold; }
@@ -20,196 +20,179 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 2400; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
-        .section { display: none; width: 95%; max-width: 500px; margin: 20px auto; animation: fadeIn 0.3s ease; }
+        .section { display: none; width: 95%; max-width: 500px; margin: 20px auto; }
         .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid var(--border); }
+        /* تصميم بطاقة العداد بناءً على الصورة */
+        .counter-card { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
+        .delete-icon { position: absolute; top: 15px; right: 15px; cursor: pointer; opacity: 0.6; font-size: 1.1rem; }
+        .counter-header h4 { margin: 0; font-size: 1.2rem; font-weight: 900; text-align: right; }
+        .counter-body { display: flex; justify-content: flex-end; align-items: center; gap: 20px; margin: 10px 0; }
         
-        /* تصميم العدادات بناءً على الصورة */
-        .counter-card { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
-        .counter-info h4 { margin: 0; font-size: 1.1rem; }
-        .counter-info span { font-size: 0.8rem; color: #9ca3af; }
-        .counter-controls { display: flex; align-items: center; gap: 15px; }
-        .counter-btn { width: 35px; height: 35px; border-radius: 8px; border: none; cursor: pointer; font-size: 1.2rem; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-control { width: 45px; height: 45px; border-radius: 12px; border: none; cursor: pointer; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         .btn-plus { background: var(--primary); color: white; }
-        .btn-minus { background: #e5e7eb; color: #1f2937; }
-        .count-val { font-size: 1.5rem; font-weight: 900; min-width: 30px; text-align: center; }
+        .btn-minus { background: #f3f4f6; color: #1f2937; }
+        .count-display { font-size: 1.8rem; font-weight: 900; min-width: 40px; text-align: center; }
+        .goal-text { font-size: 0.85rem; color: #9ca3af; text-align: right; }
 
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .btn-add-counter { background: transparent; border: 2px dashed var(--primary); color: var(--primary); padding: 15px; width: 100%; border-radius: 15px; cursor: pointer; font-weight: bold; margin-bottom: 30px; }
         
-        .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .note-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; justify-content: flex-end; margin-top: 10px; }
-        .note-btn { font-size: 0.75rem; cursor: pointer; padding: 5px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); box-sizing: border-box; }
+        .btn-main { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
 
-        .hidden { display: none !important; }
-        .link { color: var(--primary); cursor: pointer; font-weight: bold; font-size: 0.85rem; display: block; margin-top: 10px; text-align: center; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); padding: 25px; border-radius: 20px; z-index: 3000; width: 90%; max-width: 350px; display: none; border: 1px solid var(--border); }
+        .modal.show { display: block; }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<div class="overlay" id="overlay" onclick="closeSidebar(); closeModal();"></div>
+
+<div class="modal" id="addCounterModal">
+    <h3>➕ إضافة قسم جديد</h3>
+    <input type="text" id="newCounterLabel" placeholder="اسم القسم (مثلاً: ريبورتات)">
+    <input type="number" id="newCounterGoal" placeholder="الهدف اليومي (رقم)">
+    <button class="btn-main" onclick="confirmAddCounter()">إضافة</button>
+    <button class="btn-main" style="background:none; color:var(--text)" onclick="closeModal()">إلغاء</button>
+</div>
 
 <header>
     <div id="hamMenu" class="menu-toggle" onclick="toggleSidebar()" style="display: none;">☰</div>
-    <div style="font-weight: 900; color: var(--primary); font-size: 1.2rem;">PRO DASHBOARD</div>
-    <div onclick="toggleDark()" style="cursor:pointer; font-size: 20px;">🌓</div>
+    <div style="font-weight: 900; color: var(--primary);">PRO DASHBOARD</div>
+    <div onclick="toggleDark()" style="cursor:pointer;">🌓</div>
 </header>
 
 <nav class="sidebar" id="sidebar">
     <div class="sidebar-item" onclick="showTab('counters')">📊 العدادات</div>
     <div class="sidebar-item" onclick="showTab('notes')">📝 الملاحظات</div>
-    <div class="sidebar-item" onclick="showTab('settings')">⚙️ الإعدادات</div>
-    <div class="sidebar-item" style="color:var(--danger); border-top: 1px solid var(--border);" onclick="location.reload()">🚪 خروج</div>
+    <div class="sidebar-item" style="color:var(--danger)" onclick="location.reload()">🚪 خروج</div>
 </nav>
 
 <div id="appArea">
     <div id="authArea" class="section active">
-        <div class="card">
-            <h2 id="authTitle" style="text-align: center;">تسجيل الدخول</h2>
+        <div class="card" style="padding: 20px; background: var(--card); border-radius: 20px;">
+            <h2 style="text-align: center;">تسجيل الدخول</h2>
             <input type="text" id="userIn" placeholder="اسم المستخدم">
             <input type="password" id="passIn" placeholder="كلمة المرور">
-            <div id="regExtra" class="hidden">
-                <input type="email" id="emailIn" placeholder="الإيميل">
-                <select id="secQIn">
-                    <option>ما هو اسم أول مدرسة؟</option>
-                    <option>ما هو اسم حيوانك الأليف؟</option>
-                </select>
-                <input type="text" id="secAIn" placeholder="الإجابة السرية">
-            </div>
-            <button class="btn" onclick="handleAuth()">دخول</button>
-            <span class="link" onclick="toggleAuthMode()" id="toggleLink">إنشاء حساب جديد</span>
+            <button class="btn-main" onclick="handleAuth()">دخول</button>
         </div>
     </div>
 
     <div id="mainContent" class="hidden">
-        
         <div id="countersSec" class="section active">
             <div id="countersList"></div>
+            <button class="btn-add-counter" onclick="openAddModal()">+ إضافة عداد جديد</button>
         </div>
-
+        
         <div id="notesSec" class="section">
-            <div class="card">
-                <h3>📝 الملاحظات</h3>
-                <textarea id="noteIn" placeholder="اكتب ملاحظة..." rows="3"></textarea>
-                <button class="btn" onclick="addNote()">حفظ</button>
+            <div class="card" style="background:var(--card); border-radius: 20px; padding: 20px;">
+                <textarea id="noteIn" style="width:100%; height:100px; border-radius:10px;" placeholder="اكتب ملاحظة..."></textarea>
+                <button class="btn-main" onclick="addNote()">حفظ</button>
             </div>
             <div id="nList"></div>
-        </div>
-
-        <div id="settingsSec" class="section">
-            <div class="card">
-                <h3>⚙️ الأمان</h3>
-                <label><input type="checkbox" id="twoFAEnabled" onchange="toggleTwoFASetting()"> تفعيل التحقق بخطوتين</label>
-            </div>
         </div>
     </div>
 </div>
 
 <script>
     let currentUser = null;
-    const counterTypes = [
-        { id: 'tech', label: 'دعم فني', goal: 115 },
-        { id: 'mon', label: 'مراقبة', goal: 25 },
-        { id: 'rep', label: 'ريبورتات', goal: 20 },
-        { id: 'tix', label: 'تكتات', goal: 5 },
-        { id: 'act', label: 'تفعيل', goal: 7 }
-    ];
-
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('show');
-    }
-
-    function closeSidebar() {
-        document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('overlay').classList.remove('show');
-    }
-
-    function showTab(t) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(t + 'Sec').classList.add('active');
-        closeSidebar();
-    }
 
     function handleAuth() {
         const nm = document.getElementById('userIn').value.trim();
-        const ps = document.getElementById('passIn').value.trim();
+        if(!nm) return;
         let stored = JSON.parse(localStorage.getItem('u_'+nm));
-        
-        // لمحاكاة تسجيل الدخول أو الإنشاء لغرض العرض
         if(!stored) {
-            stored = { nm, ps, notes: [], counters: { tech:0, mon:0, rep:0, tix:0, act:0 } };
-            localStorage.setItem('u_'+nm, JSON.stringify(stored));
+            // إضافة العدادات الافتراضية لأول مرة
+            stored = { 
+                nm, 
+                notes: [], 
+                customCounters: [
+                    { id: 'tech', label: 'دعم فني', goal: 115, value: 0 },
+                    { id: 'mon', label: 'مراقبة', goal: 25, value: 0 }
+                ] 
+            };
+            saveUser(stored);
         }
-        
-        if(stored.ps === ps) {
-            currentUser = stored;
-            document.getElementById('authArea').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            document.getElementById('hamMenu').style.display = 'block';
-            renderCounters();
-            renderNotes();
-        } else alert("خطأ");
+        currentUser = stored;
+        document.getElementById('authArea').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        document.getElementById('hamMenu').style.display = 'block';
+        renderCounters();
     }
 
     function renderCounters() {
         const list = document.getElementById('countersList');
         list.innerHTML = "";
-        counterTypes.forEach(ct => {
-            const val = currentUser.counters[ct.id] || 0;
+        currentUser.customCounters.forEach((ct, index) => {
             const div = document.createElement('div');
             div.className = 'counter-card';
             div.innerHTML = `
-                <div class="counter-info">
-                    <h4>${ct.label}</h4>
-                    <span>الهدف: ${ct.goal}</span>
+                <span class="delete-icon" onclick="removeCounter(${index})">🗑️</span>
+                <div class="counter-header"><h4>${ct.label}</h4></div>
+                <div class="counter-body">
+                    <button class="btn-control btn-plus" onclick="updateVal(${index}, 1)">+</button>
+                    <span class="count-display">${ct.value}</span>
+                    <button class="btn-control btn-minus" onclick="updateVal(${index}, -1)">-</button>
                 </div>
-                <div class="counter-controls">
-                    <button class="counter-btn btn-minus" onclick="updateCounter('${ct.id}', -1)">-</button>
-                    <span class="count-val">${val}</span>
-                    <button class="counter-btn btn-plus" onclick="updateCounter('${ct.id}', 1)">+</button>
-                </div>
+                <div class="goal-text">الهدف: ${ct.goal}</div>
             `;
             list.appendChild(div);
         });
     }
 
-    function updateCounter(id, change) {
-        if(!currentUser.counters[id]) currentUser.counters[id] = 0;
-        currentUser.counters[id] = Math.max(0, currentUser.counters[id] + change);
-        save();
-        renderCounters();
+    function updateVal(index, change) {
+        currentUser.customCounters[index].value = Math.max(0, currentUser.customCounters[index].value + change);
+        saveAndRefresh();
     }
 
-    function addNote() {
-        const txt = document.getElementById('noteIn').value.trim();
-        if(txt) {
-            currentUser.notes.push({ id: Date.now(), txt });
-            save();
-            document.getElementById('noteIn').value = "";
-            renderNotes();
+    function openAddModal() {
+        document.getElementById('addCounterModal').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('addCounterModal').classList.remove('show');
+        document.getElementById('overlay').classList.remove('show');
+    }
+
+    function confirmAddCounter() {
+        const label = document.getElementById('newCounterLabel').value;
+        const goal = document.getElementById('newCounterGoal').value;
+        if(label && goal) {
+            currentUser.customCounters.push({
+                id: 'custom_' + Date.now(),
+                label: label,
+                goal: goal,
+                value: 0
+            });
+            saveAndRefresh();
+            closeModal();
+            document.getElementById('newCounterLabel').value = "";
+            document.getElementById('newCounterGoal').value = "";
         }
     }
 
-    function renderNotes() {
-        const nl = document.getElementById('nList'); nl.innerHTML = "";
-        currentUser.notes.forEach(n => {
-            const div = document.createElement('div');
-            div.className = 'note-bubble';
-            div.innerHTML = `<div>${n.txt}</div>
-                <div class="note-actions">
-                    <span class="note-btn" onclick="editNote(${n.id})">✏️ تعديل</span>
-                    <span class="note-btn" style="color:var(--danger)" onclick="deleteNote(${n.id})">🗑️ حذف</span>
-                </div>`;
-            nl.appendChild(div);
-        });
+    function removeCounter(index) {
+        if(confirm("هل تريد حذف هذا العداد نهائياً؟")) {
+            currentUser.customCounters.splice(index, 1);
+            saveAndRefresh();
+        }
     }
 
-    function save() { localStorage.setItem('u_'+currentUser.nm, JSON.stringify(currentUser)); }
+    function saveAndRefresh() {
+        saveUser(currentUser);
+        renderCounters();
+    }
+
+    function saveUser(user) { localStorage.setItem('u_'+user.nm, JSON.stringify(user)); }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
+    function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
     function toggleDark() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light'); }
-    function toggleAuthMode() { /* نفس وظيفة التبديل السابقة */ }
+    function showTab(t) { 
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(t + 'Sec').classList.add('active');
+        closeSidebar();
+    }
 </script>
 </body>
 </html>
