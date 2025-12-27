@@ -3,171 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRO DASHBOARD | أنور</title>
+    <title>PRO DASHBOARD</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --danger: #ef4444; }
-        
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; }
-        
-        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 2000; height: 65px; box-sizing: border-box; }
-        
-        /* قائمة الهمبرجر */
-        .menu-toggle { font-size: 24px; cursor: pointer; color: var(--primary); }
-        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--card); transition: 0.4s ease; z-index: 2500; padding-top: 70px; border-left: 1px solid var(--border); }
-        .sidebar.open { right: 0; }
-        .sidebar-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; font-weight: bold; }
-        .sidebar-item:hover { background: rgba(99, 102, 241, 0.1); }
+        :root {
+            --primary-color: #6366f1;
+            --bg-color: #111827;
+            --card-bg: #1f2937;
+            --text-color: #f9fafb;
+            --border-color: #374151;
+        }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 2400; backdrop-filter: blur(4px); }
-        .overlay.show { display: block; }
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-        .section { display: none; width: 95%; max-width: 500px; margin: 20px auto; }
-        .section.active { display: block; }
+        header {
+            width: 100%;
+            background-color: var(--card-bg);
+            padding: 20px 0;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
 
-        /* تصميم العدادات المطبق من صورك */
-        .counter-card { background: var(--card); padding: 20px; border-radius: 20px; margin-bottom: 15px; border: 1px solid var(--border); position: relative; }
-        .delete-btn { position: absolute; top: 15px; right: 15px; cursor: pointer; opacity: 0.5; font-size: 1rem; }
-        .counter-header h4 { margin: 0; font-size: 1.2rem; font-weight: 900; }
-        .counter-body { display: flex; justify-content: flex-end; align-items: center; gap: 15px; margin: 15px 0; }
-        
-        .btn-ctrl { width: 45px; height: 45px; border-radius: 12px; border: none; cursor: pointer; font-size: 1.5rem; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-plus { background: var(--primary); color: white; }
-        .btn-minus { background: #f3f4f6; color: #111827; }
-        .count-val { font-size: 1.8rem; font-weight: 900; min-width: 45px; text-align: center; }
-        .goal-txt { font-size: 0.85rem; color: #9ca3af; }
+        .container {
+            width: 90%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 50px;
+        }
 
-        /* أزرار الملاحظات بناءً على الصورة */
-        .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; border: 1px solid var(--border); margin-bottom: 15px; }
-        .note-btns { display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
-        .action-btn { font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .counter-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+        }
 
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
-        .btn-full { background: var(--primary); color: white; border: none; padding: 14px; width: 100%; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 1rem; }
-        
-        .hidden { display: none !important; }
-        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); padding: 25px; border-radius: 20px; z-index: 3000; width: 90%; max-width: 350px; display: none; border: 1px solid var(--border); }
+        .counter-info {
+            text-align: right;
+        }
+
+        .counter-info h2 {
+            margin: 0;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .counter-info p {
+            margin: 5px 0 0;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.9);
+        }
+
+        .btn-plus {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-minus {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+
+        .count-value {
+            font-size: 1.5rem;
+            font-weight: 900;
+            min-width: 30px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="closeAll()"></div>
+<header>PRO DASHBOARD</header>
 
-<div class="modal" id="addModal">
-    <h3 style="margin-top:0">➕ إضافة قسم جديد</h3>
-    <input type="text" id="newTitle" placeholder="اسم القسم">
-    <input type="number" id="newGoal" placeholder="الهدف">
-    <button class="btn-full" onclick="addNewCounter()">إضافة</button>
-</div>
-
-<header>
-    <div id="hamBtn" class="menu-toggle" onclick="toggleSidebar()" style="display:none">☰</div>
-    <div style="font-weight: 900; color: var(--primary); font-size: 1.2rem;">PRO DASHBOARD</div>
-    <div onclick="toggleTheme()" style="cursor:pointer; font-size:20px">🌓</div>
-</header>
-
-<nav class="sidebar" id="sidebar">
-    <div class="sidebar-item" onclick="showTab('counters')">📊 العدادات</div>
-    <div class="sidebar-item" onclick="showTab('notes')">📝 الملاحظات</div>
-    <div class="sidebar-item" style="color:var(--danger); border-top:1px solid var(--border); margin-top:20px" onclick="location.reload()">🚪 تسجيل الخروج</div>
-</nav>
-
-<div id="authArea" class="section active">
-    <div style="background:var(--card); padding:30px; border-radius:25px; border:1px solid var(--border); text-align:center">
-        <h2 style="margin-top:0">تسجيل الدخول</h2>
-        <input type="text" id="userIn" placeholder="اسم المستخدم">
-        <input type="password" id="passIn" placeholder="كلمة المرور">
-        <button class="btn-full" onclick="login()">دخول</button>
-        <p style="color:var(--primary); cursor:pointer; font-size:0.9rem; margin-top:15px">إنشاء حساب جديد</p>
-    </div>
-</div>
-
-<div id="mainApp" class="hidden">
-    <div id="countersSec" class="section active">
-        <div id="countersList"></div>
-        <button class="btn-full" style="background:transparent; border:2px dashed var(--primary); color:var(--primary)" onclick="openModal()">+ إضافة عداد جديد</button>
-    </div>
-
-    <div id="notesSec" class="section">
-        <div style="background:var(--card); padding:20px; border-radius:20px; border:1px solid var(--border)">
-            <h3 style="margin-top:0">📝 الملاحظات</h3>
-            <textarea id="noteText" placeholder="اكتب ملاحظة..." rows="4"></textarea>
-            <button class="btn-full" onclick="saveNote()">حفظ</button>
+<div class="container">
+    <div class="counter-card">
+        <div class="counter-controls">
+            <button class="btn btn-plus" onclick="updateCounter('tech', 1)">+</button>
+            <span class="count-value" id="tech-val">0</span>
+            <button class="btn btn-minus" onclick="updateCounter('tech', -1)">-</button>
         </div>
-        <div id="nList" style="margin-top:20px"></div>
+        <div class="counter-info">
+            <h2>دعم فني</h2>
+            <p>الهدف: 115</p>
+        </div>
+    </div>
+
+    <div class="counter-card">
+        <div class="counter-controls">
+            <button class="btn btn-plus" onclick="updateCounter('mon', 1)">+</button>
+            <span class="count-value" id="mon-val">0</span>
+            <button class="btn btn-minus" onclick="updateCounter('mon', -1)">-</button>
+        </div>
+        <div class="counter-info">
+            <h2>مراقبة</h2>
+            <p>الهدف: 25</p>
+        </div>
+    </div>
+
+    <div class="counter-card">
+        <div class="counter-controls">
+            <button class="btn btn-plus" onclick="updateCounter('rep', 1)">+</button>
+            <span class="count-value" id="rep-val">0</span>
+            <button class="btn btn-minus" onclick="updateCounter('rep', -1)">-</button>
+        </div>
+        <div class="counter-info">
+            <h2>ريبورتات</h2>
+            <p>الهدف: 20</p>
+        </div>
+    </div>
+
+    <div class="counter-card">
+        <div class="counter-controls">
+            <button class="btn btn-plus" onclick="updateCounter('tix', 1)">+</button>
+            <span class="count-value" id="tix-val">0</span>
+            <button class="btn btn-minus" onclick="updateCounter('tix', -1)">-</button>
+        </div>
+        <div class="counter-info">
+            <h2>تكتات</h2>
+            <p>الهدف: 5</p>
+        </div>
+    </div>
+
+    <div class="counter-card">
+        <div class="counter-controls">
+            <button class="btn btn-plus" onclick="updateCounter('act', 1)">+</button>
+            <span class="count-value" id="act-val">0</span>
+            <button class="btn btn-minus" onclick="updateCounter('act', -1)">-</button>
+        </div>
+        <div class="counter-info">
+            <h2>تفعيل</h2>
+            <p>الهدف: 7</p>
+        </div>
     </div>
 </div>
 
 <script>
-    let user = null;
-    let defaultCounters = [
-        { title: 'دعم فني', goal: 115, val: 14 },
-        { title: 'مراقبة', goal: 25, val: 0 },
-        { title: 'ريبورتات', goal: 20, val: 0 },
-        { title: 'تكتات', goal: 5, val: 0 },
-        { title: 'تفعيل', goal: 7, val: 0 }
-    ];
+    const counts = { tech: 0, mon: 0, rep: 0, tix: 0, act: 0 };
 
-    function login() {
-        const u = document.getElementById('userIn').value;
-        if(!u) return;
-        let data = JSON.parse(localStorage.getItem('pro_'+u)) || { name:u, counters: defaultCounters, notes: [] };
-        user = data;
-        document.getElementById('authArea').classList.add('hidden');
-        document.getElementById('mainApp').classList.remove('hidden');
-        document.getElementById('hamBtn').style.display = 'block';
-        renderAll();
-    }
-
-    function renderAll() {
-        // رندر العدادات
-        const cl = document.getElementById('countersList');
-        cl.innerHTML = "";
-        user.counters.forEach((c, i) => {
-            cl.innerHTML += `
-                <div class="counter-card">
-                    <span class="delete-btn" onclick="delCounter(${i})">🗑️</span>
-                    <div class="counter-header"><h4>${c.title}</h4></div>
-                    <div class="counter-body">
-                        <button class="btn-ctrl btn-plus" onclick="upd(${i},1)">+</button>
-                        <span class="count-val">${c.val}</span>
-                        <button class="btn-ctrl btn-minus" onclick="upd(${i},-1)">-</button>
-                    </div>
-                    <div class="goal-txt">الهدف: ${c.goal}</div>
-                </div>`;
-        });
-
-        // رندر الملاحظات
-        const nl = document.getElementById('nList');
-        nl.innerHTML = "";
-        user.notes.forEach((n, i) => {
-            nl.innerHTML += `
-                <div class="note-bubble">
-                    <div>${n}</div>
-                    <div class="note-btns">
-                        <span class="action-btn" onclick="copyNote('${n}')">📋 نسخ</span>
-                        <span class="action-btn" style="color:var(--danger)" onclick="delNote(${i})">🗑️ حذف</span>
-                    </div>
-                </div>`;
-        });
-        localStorage.setItem('pro_'+user.name, JSON.stringify(user));
-    }
-
-    function upd(i, amt) { user.counters[i].val = Math.max(0, user.counters[i].val + amt); renderAll(); }
-    function delCounter(i) { if(confirm('حذف القسم؟')) { user.counters.splice(i,1); renderAll(); } }
-    function saveNote() { const t = document.getElementById('noteText').value; if(t) { user.notes.unshift(t); document.getElementById('noteText').value=""; renderAll(); } }
-    function delNote(i) { user.notes.splice(i,1); renderAll(); }
-    function copyNote(t) { navigator.clipboard.writeText(t); alert('تم النسخ'); }
-
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
-    function closeAll() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('addModal').style.display='none'; document.getElementById('overlay').classList.remove('show'); }
-    function showTab(t) { document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); document.getElementById(t+'Sec').classList.add('active'); closeAll(); }
-    function openModal() { document.getElementById('addModal').style.display='block'; document.getElementById('overlay').classList.add('show'); }
-    function addNewCounter() {
-        const t = document.getElementById('newTitle').value;
-        const g = document.getElementById('newGoal').value;
-        if(t && g) { user.counters.push({title:t, goal:g, val:0}); renderAll(); closeAll(); }
+    function updateCounter(id, change) {
+        counts[id] = Math.max(0, counts[id] + change);
+        document.getElementById(id + '-val').innerText = counts[id];
     }
 </script>
+
 </body>
 </html>
