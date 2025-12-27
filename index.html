@@ -20,7 +20,7 @@
         .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2400; backdrop-filter: blur(4px); }
         .overlay.show { display: block; }
 
-        /* ستايل النافذة المنبثقة المخصصة */
+        /* النافذة المنبثقة المخصصة */
         .custom-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--card); padding: 25px; border-radius: 20px; z-index: 3000; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; opacity: 0; transition: 0.3s; border: 1px solid var(--border); }
         .custom-modal.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
         .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
@@ -50,7 +50,8 @@
         .note-btn { font-size: 0.75rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
         
         .hidden { display: none !important; }
-        .link { color: var(--primary); cursor: pointer; font-weight: bold; }
+        .link-footer { text-align: center; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .link { color: var(--primary); cursor: pointer; font-weight: bold; font-size: 0.9rem; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -58,9 +59,9 @@
 <div class="overlay" id="overlay" onclick="closeModal()"></div>
 <div class="custom-modal" id="customModal">
     <h3 id="modalTitle">تأكيد الحذف</h3>
-    <p id="modalMsg">هل أنت متأكد من رغبتك في الحذف؟</p>
+    <p id="modalMsg">هل أنت متأكد؟</p>
     <div class="modal-btns">
-        <button class="m-confirm" id="modalConfirmBtn">نعم، حذف</button>
+        <button class="m-confirm" id="modalConfirmBtn">نعم</button>
         <button class="m-cancel" onclick="closeModal()">إلغاء</button>
     </div>
 </div>
@@ -85,8 +86,9 @@
             <input type="text" id="userIn" placeholder="اسم المستخدم">
             <input type="password" id="passIn" placeholder="كلمة المرور">
             <button class="btn" id="mainAuthBtn" onclick="handleAuth()">دخول</button>
-            <div style="text-align: center; margin-top:15px;">
+            <div class="link-footer">
                 <span class="link" onclick="toggleAuthMode()" id="toggleLink">إنشاء حساب جديد</span>
+                <span class="link" style="opacity: 0.6; font-size: 0.8rem;">نسيت كلمة المرور؟ (تواصل مع المسؤول)</span>
             </div>
         </div>
     </div>
@@ -96,7 +98,7 @@
             <div class="card">
                 <h3>➕ إضافة عداد جديد</h3>
                 <input type="text" id="newCName" placeholder="اسم العداد">
-                <input type="number" id="newCTarget" placeholder="الهدف (اختياري)">
+                <input type="number" id="newCTarget" placeholder="الهدف">
                 <button class="btn" onclick="addCounter()">حفظ العداد</button>
             </div>
             <div id="cList"></div>
@@ -114,7 +116,7 @@
         <div id="settingsSec" class="section">
             <div class="card">
                 <h3>⚙️ الإعدادات</h3>
-                <button class="btn" onclick="logout()" style="background: #ef4444;">تسجيل الخروج</button>
+                <button class="btn" onclick="logout()" style="background: var(--danger);">تسجيل الخروج</button>
             </div>
         </div>
     </div>
@@ -122,24 +124,18 @@
 
 <script>
     let user = null;
-    let pendingAction = null; // لتخزين الوظيفة التي ستنفذ عند التأكيد
 
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('open');
         document.getElementById('overlay').classList.toggle('show');
     }
 
-    // وظائف النافذة المنبثقة المخصصة
     function showModal(title, msg, onConfirm) {
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalMsg').innerText = msg;
         document.getElementById('overlay').classList.add('show');
         document.getElementById('customModal').classList.add('show');
-        
-        document.getElementById('modalConfirmBtn').onclick = function() {
-            onConfirm();
-            closeModal();
-        };
+        document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); closeModal(); };
     }
 
     function closeModal() {
@@ -162,12 +158,15 @@
     function toggleAuthMode() {
         const title = document.getElementById('authTitle');
         const btn = document.getElementById('mainAuthBtn');
+        const link = document.getElementById('toggleLink');
         if(title.innerText === "تسجيل الدخول") {
             title.innerText = "حساب جديد";
             btn.innerText = "تسجيل";
+            link.innerText = "لديك حساب؟ دخول";
         } else {
             title.innerText = "تسجيل الدخول";
             btn.innerText = "دخول";
+            link.innerText = "إنشاء حساب جديد";
         }
     }
 
@@ -175,13 +174,11 @@
         const nm = document.getElementById('userIn').value.trim();
         const ps = document.getElementById('passIn').value.trim();
         if(!nm || !ps) return alert("أكمل البيانات");
-
         const isReg = document.getElementById('authTitle').innerText === "حساب جديد";
-
         if(isReg) {
             if(localStorage.getItem('u_'+nm)) return alert("اليوزر موجود");
             user = { nm, ps, counters: [], notes: [] };
-            save();
+            localStorage.setItem('u_'+nm, JSON.stringify(user));
             alert("تم التسجيل! سجل دخولك الآن");
             toggleAuthMode();
         } else {
@@ -201,32 +198,20 @@
     function addCounter() {
         const name = document.getElementById('newCName').value;
         const target = parseInt(document.getElementById('newCTarget').value) || 0;
-        if(name) { 
-            user.counters.push({ name, count: 0, target: target }); 
-            save(); 
-            document.getElementById('newCName').value = "";
-            document.getElementById('newCTarget').value = "";
-        }
+        if(name) { user.counters.push({ name, count: 0, target: target }); save(); }
     }
 
     function updateCounter(i, amt) {
         if(amt === -1 && user.counters[i].count <= 0) return;
-        user.counters[i].count += amt;
-        save();
+        user.counters[i].count += amt; save();
     }
 
     function resetCounter(i) {
-        showModal("تصفير العداد", "هل تريد إعادة العداد إلى صفر؟", () => {
-            user.counters[i].count = 0;
-            save();
-        });
+        showModal("تصفير العداد", "هل تريد التصفير؟", () => { user.counters[i].count = 0; save(); });
     }
 
     function deleteCounter(i) {
-        showModal("حذف العداد", "سيتم حذف العداد نهائياً، هل أنت متأكد؟", () => {
-            user.counters.splice(i, 1);
-            save();
-        });
+        showModal("حذف العداد", "سيتم الحذف نهائياً، متأكد؟", () => { user.counters.splice(i, 1); save(); });
     }
 
     function addNote() {
@@ -234,58 +219,35 @@
         if(txt) {
             if(!user.notes) user.notes = [];
             user.notes.push({ id: Date.now(), txt: txt });
+            document.getElementById('noteIn').value = "";
             save(); 
-            document.getElementById('noteIn').value = ""; 
         }
     }
 
     function deleteNote(id) {
-        showModal("حذف الملاحظة", "هل تريد حذف هذه الملاحظة؟", () => {
+        showModal("حذف الملاحظة", "هل تريد حذف الملاحظة؟", () => {
             user.notes = user.notes.filter(n => n.id !== id);
             save();
         });
     }
 
-    function copyNote(txt) {
-        navigator.clipboard.writeText(txt).then(() => alert("تم النسخ ✅"));
-    }
-
-    function enableEdit(id) {
-        document.getElementById(`text-box-${id}`).classList.add('hidden');
-        document.getElementById(`edit-ctrl-${id}`).classList.remove('hidden');
-    }
-
-    function saveEdit(id) {
-        const newTxt = document.getElementById(`input-${id}`).value.trim();
-        if(newTxt) {
-            const index = user.notes.findIndex(n => n.id == id);
-            user.notes[index].txt = newTxt;
-            save();
-        }
-    }
-
     function save() {
-        if(user) {
-            localStorage.setItem('u_'+user.nm, JSON.stringify(user));
-            render();
-        }
+        if(user) { localStorage.setItem('u_'+user.nm, JSON.stringify(user)); render(); }
     }
 
+    // الطريقة الأضمن لعرض النص كنص فقط
     function render() {
         if(!user) return;
         
+        // رندر العدادات
         const cl = document.getElementById('cList'); cl.innerHTML = "";
         user.counters.forEach((c, i) => {
             const isReached = c.target > 0 && c.count >= c.target;
             const row = document.createElement('div');
             row.className = `counter-row ${isReached ? 'reached' : ''}`;
-            
             row.innerHTML = `
                 <div class="c-header">
-                    <div>
-                        <strong class="c-name"></strong>
-                        <button class="reset-btn" onclick="resetCounter(${i})">تصفير 🔄</button>
-                    </div>
+                    <div><strong class="c-name"></strong> <button class="reset-btn" onclick="resetCounter(${i})">تصفير 🔄</button></div>
                     <span style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</span>
                 </div>
                 <div class="c-main">
@@ -294,37 +256,32 @@
                         <span style="font-weight:bold; font-size:1.8rem; min-width:60px; text-align:center;">${c.count}</span>
                         <button class="m-btn" onclick="updateCounter(${i}, -1)" ${c.count <= 0 ? 'disabled' : ''}>-</button>
                     </div>
-                    <div style="font-size:0.7rem; color:#888;">الهدف: ${c.target || 'بلا'}</div>
-                </div>
-                <div class="remaining-text" style="font-size:0.85rem; font-weight:bold; margin-top:8px; color:var(--primary);">
-                    ${c.target > 0 ? (isReached ? '🌟 تم الوصول!' : 'باقي لك ' + (c.target - c.count)) : ''}
                 </div>
             `;
             row.querySelector('.c-name').textContent = c.name;
             cl.appendChild(row);
         });
 
+        // رندر الملاحظات - الحماية القصوى ضد تحول الكود
         const nl = document.getElementById('nList'); nl.innerHTML = "";
         (user.notes || []).forEach(n => {
             const bubble = document.createElement('div');
             bubble.className = 'note-bubble';
-            bubble.innerHTML = `
-                <div id="text-box-${n.id}">
-                    <div class="note-text" id="content-${n.id}"></div>
-                    <div class="note-actions">
-                        <span class="note-btn copy-btn">نسخ 📋</span>
-                        <span class="note-btn" onclick="enableEdit('${n.id}')">تعديل ✏️</span>
-                        <span class="note-btn" style="color:#ef4444;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
-                    </div>
-                </div>
-                <div id="edit-ctrl-${n.id}" class="hidden">
-                    <textarea id="input-${n.id}" class="edit-area" rows="3"></textarea>
-                    <button class="btn" style="padding:8px;" onclick="saveEdit('${n.id}')">حفظ التعديل</button>
-                </div>
+            
+            // إنشاء عنصر النص واستخدام createTextNode لضمان عدم تشغيل أي كود
+            const textDiv = document.createElement('div');
+            textDiv.className = 'note-text';
+            textDiv.appendChild(document.createTextNode(n.txt)); 
+
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'note-actions';
+            actionsDiv.innerHTML = `
+                <span class="note-btn" onclick="navigator.clipboard.writeText(\`${n.txt.replace(/`/g, '\\`')}\`).then(()=>alert('تم النسخ'))">نسخ 📋</span>
+                <span class="note-btn" style="color:var(--danger);" onclick="deleteNote(${n.id})">حذف 🗑️</span>
             `;
-            bubble.querySelector(`#content-${n.id}`).textContent = n.txt;
-            bubble.querySelector(`#input-${n.id}`).value = n.txt;
-            bubble.querySelector('.copy-btn').onclick = () => copyNote(n.txt);
+
+            bubble.appendChild(textDiv);
+            bubble.appendChild(actionsDiv);
             nl.appendChild(bubble);
         });
     }
