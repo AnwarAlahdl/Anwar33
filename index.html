@@ -26,33 +26,22 @@
         
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
         .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
         
-        /* العدادات */
-        .counter-row { display: flex; flex-direction: column; background: var(--card); padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 6px solid var(--primary); transition: 0.3s; }
+        .counter-row { display: flex; flex-direction: column; background: var(--card); padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 6px solid var(--primary); }
         .counter-row.reached { border-right-color: var(--success); background: rgba(16, 185, 129, 0.08); border-color: var(--success); }
         
         .c-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .c-main { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+        .c-main { display: flex; justify-content: space-between; align-items: center; }
         .c-controls { display: flex; align-items: center; gap: 12px; }
         
-        .m-btn { width: 50px; height: 50px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 12px; font-size: 1.6rem; font-weight: bold; cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; }
-        .m-btn:active { transform: scale(0.9); }
-        .m-btn:disabled { opacity: 0.3; }
+        .m-btn { width: 50px; height: 50px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 12px; font-size: 1.6rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .reset-btn { font-size: 0.75rem; background: #9ca3af; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; margin-right: 10px; }
 
-        .remaining-text { font-size: 0.85rem; font-weight: bold; margin-top: 8px; color: var(--primary); }
-        .reached .remaining-text { color: var(--success); }
-
-        .reset-btn { font-size: 0.75rem; background: #9ca3af; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; margin-right: 10px; transition: 0.3s; }
-        .reset-btn:hover { background: #6b7280; }
-
-        /* الملاحظات */
         .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .note-text { margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+        .note-text { margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
         .note-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; }
         .note-btn { font-size: 0.75rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
-        .edit-area { width: 100%; background: var(--bg); color: var(--text); border: 1px solid var(--primary); border-radius: 10px; padding: 10px; margin-bottom: 10px; }
-
+        
         .hidden { display: none !important; }
         .link { color: var(--primary); cursor: pointer; font-weight: bold; }
     </style>
@@ -62,7 +51,7 @@
 <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <header>
-    <div id="ham" class="menu-toggle" onclick="toggleMenu()" style="display:block;">☰</div>
+    <div id="ham" class="menu-toggle" onclick="toggleMenu()">☰</div>
     <div style="font-weight: 900; color: var(--primary); font-size: 1.2rem;">PRO DASHBOARD</div>
     <div onclick="toggleDark()" style="cursor:pointer; font-size: 24px;">🌓</div>
 </header>
@@ -118,7 +107,6 @@
 
 <script>
     let user = null;
-    let isRegMode = false;
 
     function toggleMenu() {
         document.getElementById('sidebar').classList.toggle('open');
@@ -137,9 +125,15 @@
     }
 
     function toggleAuthMode() {
-        isRegMode = !isRegMode;
-        document.getElementById('authTitle').innerText = isRegMode ? "حساب جديد" : "تسجيل الدخول";
-        document.getElementById('mainAuthBtn').innerText = isRegMode ? "تسجيل" : "دخول";
+        const title = document.getElementById('authTitle');
+        const btn = document.getElementById('mainAuthBtn');
+        if(title.innerText === "تسجيل الدخول") {
+            title.innerText = "حساب جديد";
+            btn.innerText = "تسجيل";
+        } else {
+            title.innerText = "تسجيل الدخول";
+            btn.innerText = "دخول";
+        }
     }
 
     function handleAuth() {
@@ -147,11 +141,14 @@
         const ps = document.getElementById('passIn').value.trim();
         if(!nm || !ps) return alert("أكمل البيانات");
 
-        if(isRegMode) {
+        const isReg = document.getElementById('authTitle').innerText === "حساب جديد";
+
+        if(isReg) {
             if(localStorage.getItem('u_'+nm)) return alert("اليوزر موجود");
             user = { nm, ps, counters: [], notes: [] };
             save();
-            alert("تم التسجيل!"); toggleAuthMode();
+            alert("تم التسجيل! سجل دخولك الآن");
+            toggleAuthMode();
         } else {
             let stored = JSON.parse(localStorage.getItem('u_'+nm));
             if(stored && stored.ps === ps) { user = stored; loginSuccess(); }
@@ -162,6 +159,7 @@
     function loginSuccess() {
         document.getElementById('authArea').classList.add('hidden');
         document.getElementById('mainContent').classList.remove('hidden');
+        document.getElementById('ham').style.display = 'block';
         render();
     }
 
@@ -212,8 +210,7 @@
     }
 
     function enableEdit(id) {
-        document.getElementById(`text-${id}`).classList.add('hidden');
-        document.getElementById(`actions-${id}`).classList.add('hidden');
+        document.getElementById(`text-box-${id}`).classList.add('hidden');
         document.getElementById(`edit-ctrl-${id}`).classList.remove('hidden');
     }
 
@@ -233,13 +230,6 @@
         }
     }
 
-    // الدالة المسؤولة عن منع تحول الملاحظة لكود
-    function escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
     function render() {
         if(!user) return;
         
@@ -247,14 +237,13 @@
         const cl = document.getElementById('cList'); cl.innerHTML = "";
         user.counters.forEach((c, i) => {
             const isReached = c.target > 0 && c.count >= c.target;
-            const remaining = c.target - c.count;
-            let statusHtml = c.target > 0 ? (isReached ? '🌟 تم الوصول!' : `باقي لك ${remaining}`) : '';
-
-            cl.innerHTML += `
-            <div class="counter-row ${isReached ? 'reached' : ''}">
+            const row = document.createElement('div');
+            row.className = `counter-row ${isReached ? 'reached' : ''}`;
+            
+            row.innerHTML = `
                 <div class="c-header">
                     <div>
-                        <span style="font-weight:900;">${escapeHtml(c.name)}</span>
+                        <strong class="c-name"></strong>
                         <button class="reset-btn" onclick="resetCounter(${i})">تصفير 🔄</button>
                     </div>
                     <span style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</span>
@@ -267,29 +256,40 @@
                     </div>
                     <div style="font-size:0.7rem; color:#888;">الهدف: ${c.target || 'بلا'}</div>
                 </div>
-                <div class="remaining-text">${statusHtml}</div>
-            </div>`;
+                <div class="remaining-text" style="font-size:0.85rem; font-weight:bold; margin-top:8px; color:var(--primary);">
+                    ${c.target > 0 ? (isReached ? '🌟 تم الوصول!' : 'باقي لك ' + (c.target - c.count)) : ''}
+                </div>
+            `;
+            row.querySelector('.c-name').textContent = c.name; // حقن النص كـ Text
+            cl.appendChild(row);
         });
 
-        // رندر الملاحظات مع حماية النصوص
+        // رندر الملاحظات - الحماية القصوى
         const nl = document.getElementById('nList'); nl.innerHTML = "";
         (user.notes || []).forEach(n => {
-            // تحويل النص ليكون نصاً آمناً لا يتحول لـ HTML
-            const safeText = escapeHtml(n.txt);
-            
-            nl.innerHTML += `
-            <div class="note-bubble">
-                <div id="text-${n.id}" class="note-text">${safeText}</div>
-                <div id="actions-${n.id}" class="note-actions">
-                    <span class="note-btn" onclick="copyNote(\`${safeText}\`)">نسخ 📋</span>
-                    <span class="note-btn" onclick="enableEdit('${n.id}')">تعديل ✏️</span>
-                    <span class="note-btn" style="color:#ef4444;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
+            const bubble = document.createElement('div');
+            bubble.className = 'note-bubble';
+            bubble.innerHTML = `
+                <div id="text-box-${n.id}">
+                    <div class="note-text" id="content-${n.id}"></div>
+                    <div class="note-actions">
+                        <span class="note-btn copy-btn">نسخ 📋</span>
+                        <span class="note-btn" onclick="enableEdit('${n.id}')">تعديل ✏️</span>
+                        <span class="note-btn" style="color:#ef4444;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
+                    </div>
                 </div>
                 <div id="edit-ctrl-${n.id}" class="hidden">
-                    <textarea id="input-${n.id}" class="edit-area" rows="3">${safeText}</textarea>
+                    <textarea id="input-${n.id}" class="edit-area" rows="3"></textarea>
                     <button class="btn" style="padding:8px;" onclick="saveEdit('${n.id}')">حفظ التعديل</button>
                 </div>
-            </div>`;
+            `;
+            
+            // حقن النصوص كنص مجرد (Text Content) لمنع تشغيل أي كود
+            bubble.querySelector(`#content-${n.id}`).textContent = n.txt;
+            bubble.querySelector(`#input-${n.id}`).value = n.txt;
+            bubble.querySelector('.copy-btn').onclick = () => copyNote(n.txt);
+            
+            nl.appendChild(bubble);
         });
     }
 
