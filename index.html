@@ -3,81 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>برو داشبورد | أنور</title>
+    <title>برو داشبورد المطور | أنور</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --success: #10b981; --danger: #ef4444; }
         [data-theme="light"] { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --border: #ddd; }
-        
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; }
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; }
         header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 2000; }
-        .menu-toggle { font-size: 28px; cursor: pointer; color: var(--primary); display: none; }
-
-        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--card); transition: 0.4s ease; z-index: 2500; padding-top: 80px; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
-        .sidebar.open { right: 0; }
-        .sidebar-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; font-weight: bold; }
-
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2400; backdrop-filter: blur(4px); }
-        .overlay.show { display: block; }
-
-        /* النافذة المنبثقة المخصصة */
-        .custom-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--card); padding: 25px; border-radius: 20px; z-index: 3000; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; opacity: 0; transition: 0.3s; border: 1px solid var(--border); }
-        .custom-modal.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .m-confirm { background: var(--danger); color: white; border: none; padding: 10px; flex: 1; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .m-cancel { background: var(--border); color: var(--text); border: none; padding: 10px; flex: 1; border-radius: 10px; cursor: pointer; font-weight: bold; }
-
         .section { display: none; width: 95%; max-width: 500px; margin: 20px auto; }
         .section.active { display: block; }
         .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        
-        .counter-row { display: flex; flex-direction: column; background: var(--card); padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 6px solid var(--primary); }
-        .counter-row.reached { border-right-color: var(--success); background: rgba(16, 185, 129, 0.08); border-color: var(--success); }
-        
-        .c-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .c-main { display: flex; justify-content: space-between; align-items: center; }
-        .c-controls { display: flex; align-items: center; gap: 12px; }
-        
-        .m-btn { width: 50px; height: 50px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 12px; font-size: 1.6rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .reset-btn { font-size: 0.75rem; background: #9ca3af; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; margin-right: 10px; }
-
+        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; margin-top: 5px; }
         .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .note-text { margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
-        .note-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; }
-        .note-btn { font-size: 0.75rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
-        
+        .note-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; justify-content: flex-end; }
+        .note-btn { font-size: 0.75rem; cursor: pointer; padding: 5px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; z-index: 2400; backdrop-filter: blur(4px); }
+        .custom-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); padding: 25px; border-radius: 20px; z-index: 3000; width: 90%; max-width: 350px; text-align: center; display: none; border: 1px solid var(--border); }
+        .show { display: block !important; }
         .hidden { display: none !important; }
-        .link-footer { text-align: center; margin-top: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .link { color: var(--primary); cursor: pointer; font-weight: bold; font-size: 0.9rem; text-decoration: none; }
+        .link { color: var(--primary); cursor: pointer; font-weight: bold; font-size: 0.85rem; display: block; margin-top: 10px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="closeModal()"></div>
-<div class="custom-modal" id="customModal">
-    <h3 id="modalTitle">تأكيد الحذف</h3>
-    <p id="modalMsg">هل أنت متأكد؟</p>
-    <div class="modal-btns">
-        <button class="m-confirm" id="modalConfirmBtn">نعم</button>
-        <button class="m-cancel" onclick="closeModal()">إلغاء</button>
+<div class="overlay" id="overlay"></div>
+
+<div class="custom-modal" id="twoFAModal">
+    <h3>🔐 تحقق أمان إضافي</h3>
+    <p>يرجى إدخال رمز التحقق الخاص بك</p>
+    <input type="password" id="twoFAInput" placeholder="أدخل الرمز الإضافي">
+    <button class="btn" onclick="verifyTwoFA()">تحقق ودخول</button>
+</div>
+
+<div class="custom-modal" id="forgotModal">
+    <h3>🔍 استعادة الحساب</h3>
+    <div id="forgotStep1">
+        <input type="text" id="forgotUser" placeholder="اسم المستخدم">
+        <button class="btn" onclick="checkUserForForgot()">متابعة</button>
     </div>
+    <div id="forgotStep2" class="hidden">
+        <p id="displayQuestion" style="font-weight: bold; color: var(--primary);"></p>
+        <input type="text" id="forgotAnswer" placeholder="إجابتك السرية">
+        <button class="btn" onclick="verifySecurityAnswer()">تحقق من الإجابة</button>
+    </div>
+    <button class="link" onclick="closeModals()" style="background:none; border:none; width:100%">إلغاء</button>
 </div>
 
 <header>
-    <div id="ham" class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <div style="font-weight: 900; color: var(--primary); font-size: 1.2rem;">PRO DASHBOARD</div>
-    <div onclick="toggleDark()" style="cursor:pointer; font-size: 24px;">🌓</div>
+    <div style="font-weight: 900; color: var(--primary);">PRO DASHBOARD</div>
+    <div style="display: flex; gap: 15px;">
+        <span onclick="showTab('settings')" id="setBtn" class="hidden" style="cursor:pointer">⚙️</span>
+        <span onclick="toggleDark()" style="cursor:pointer">🌓</span>
+    </div>
 </header>
-
-<nav class="sidebar" id="sidebar">
-    <div class="sidebar-item" onclick="showTab('home')">🏠 العدادات</div>
-    <div class="sidebar-item" onclick="showTab('notes')">📝 الملاحظات</div>
-    <div class="sidebar-item" onclick="showTab('settings')">⚙️ الإعدادات</div>
-    <div class="sidebar-item" style="color:red; margin-top:50px" onclick="logout()">🚪 خروج</div>
-</nav>
 
 <div id="appArea">
     <div id="authArea" class="section active">
@@ -85,26 +64,24 @@
             <h2 id="authTitle" style="text-align: center;">تسجيل الدخول</h2>
             <input type="text" id="userIn" placeholder="اسم المستخدم">
             <input type="password" id="passIn" placeholder="كلمة المرور">
-            <button class="btn" id="mainAuthBtn" onclick="handleAuth()">دخول</button>
-            <div class="link-footer">
-                <span class="link" onclick="toggleAuthMode()" id="toggleLink">إنشاء حساب جديد</span>
-                <span class="link" style="opacity: 0.6; font-size: 0.8rem;">نسيت كلمة المرور؟ (تواصل مع المسؤول)</span>
+            <div id="regExtra" class="hidden">
+                <input type="email" id="emailIn" placeholder="الإيميل">
+                <p style="font-size: 0.8rem; margin: 5px 0;">اختر سؤال أمان لاستعادة حسابك:</p>
+                <select id="secQIn">
+                    <option value="ما هو اسم أول مدرسة؟">ما هو اسم أول مدرسة؟</option>
+                    <option value="ما هو اسم حيوانك الأليف؟">ما هو اسم حيوانك الأليف؟</option>
+                    <option value="ما هي مدينتك المفضلة؟">ما هي مدينتك المفضلة؟</option>
+                </select>
+                <input type="text" id="secAIn" placeholder="الإجابة السرية">
             </div>
+            <button class="btn" id="mainAuthBtn" onclick="handleAuth()">دخول</button>
+            <span class="link" onclick="toggleAuthMode()" id="toggleLink">إنشاء حساب جديد</span>
+            <span class="link" onclick="openForgotModal()" style="opacity: 0.7;">نسيت كلمة المرور؟</span>
         </div>
     </div>
 
     <div id="mainContent" class="hidden">
-        <div id="homeSec" class="section active">
-            <div class="card">
-                <h3>➕ إضافة عداد جديد</h3>
-                <input type="text" id="newCName" placeholder="اسم العداد">
-                <input type="number" id="newCTarget" placeholder="الهدف">
-                <button class="btn" onclick="addCounter()">حفظ العداد</button>
-            </div>
-            <div id="cList"></div>
-        </div>
-
-        <div id="notesSec" class="section">
+        <div id="notesSec" class="section active">
             <div class="card">
                 <h3>📝 الملاحظات</h3>
                 <textarea id="noteIn" placeholder="اكتب ملاحظة..." rows="3"></textarea>
@@ -115,34 +92,26 @@
 
         <div id="settingsSec" class="section">
             <div class="card">
-                <h3>⚙️ الإعدادات</h3>
-                <button class="btn" onclick="logout()" style="background: var(--danger);">تسجيل الخروج</button>
+                <h3>⚙️ إعدادات الأمان</h3>
+                <div style="border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-bottom: 15px;">
+                    <label>تفعيل التحقق بخطوتين (2FA):</label>
+                    <input type="checkbox" id="twoFAEnabled" onchange="toggleTwoFASetting()">
+                    <div id="twoFASetArea" class="hidden">
+                        <input type="password" id="twoFAPassSet" placeholder="ضع رمز أمان جديد">
+                        <button class="btn" style="padding: 5px" onclick="saveTwoFAPass()">حفظ الرمز</button>
+                    </div>
+                </div>
+                <button class="btn" onclick="showTab('notes')">العودة للملاحظات</button>
+                <button class="btn" style="background:var(--danger); margin-top:20px" onclick="location.reload()">تسجيل الخروج</button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let user = null;
-
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('show');
-    }
-
-    function showModal(title, msg, onConfirm) {
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalMsg').innerText = msg;
-        document.getElementById('overlay').classList.add('show');
-        document.getElementById('customModal').classList.add('show');
-        document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); closeModal(); };
-    }
-
-    function closeModal() {
-        document.getElementById('overlay').classList.remove('show');
-        document.getElementById('customModal').classList.remove('show');
-        document.getElementById('sidebar').classList.remove('open');
-    }
+    let currentUser = null;
+    let authMode = 'login';
+    let tempUser = null; // للمصادقة المؤقتة
 
     function toggleDark() {
         const b = document.body;
@@ -152,141 +121,168 @@
     function showTab(t) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(t + 'Sec').classList.add('active');
-        if (document.getElementById('sidebar').classList.contains('open')) closeModal();
     }
 
     function toggleAuthMode() {
+        const extra = document.getElementById('regExtra');
         const title = document.getElementById('authTitle');
         const btn = document.getElementById('mainAuthBtn');
-        const link = document.getElementById('toggleLink');
-        if(title.innerText === "تسجيل الدخول") {
-            title.innerText = "حساب جديد";
-            btn.innerText = "تسجيل";
-            link.innerText = "لديك حساب؟ دخول";
+        if(authMode === 'login') {
+            authMode = 'reg'; title.innerText = "حساب جديد"; btn.innerText = "تسجيل"; extra.classList.remove('hidden');
         } else {
-            title.innerText = "تسجيل الدخول";
-            btn.innerText = "دخول";
-            link.innerText = "إنشاء حساب جديد";
+            authMode = 'login'; title.innerText = "تسجيل الدخول"; btn.innerText = "دخول"; extra.classList.add('hidden');
         }
     }
 
     function handleAuth() {
         const nm = document.getElementById('userIn').value.trim();
         const ps = document.getElementById('passIn').value.trim();
-        if(!nm || !ps) return alert("أكمل البيانات");
-        const isReg = document.getElementById('authTitle').innerText === "حساب جديد";
-        if(isReg) {
-            if(localStorage.getItem('u_'+nm)) return alert("اليوزر موجود");
-            user = { nm, ps, counters: [], notes: [] };
+        
+        if(authMode === 'reg') {
+            const em = document.getElementById('emailIn').value;
+            const sq = document.getElementById('secQIn').value;
+            const sa = document.getElementById('secAIn').value.trim();
+            if(!nm || !ps || !sa) return alert("يرجى إكمال كافة البيانات");
+            let user = { nm, ps, em, sq, sa, twoFA: false, twoFAPass: "", notes: [] };
             localStorage.setItem('u_'+nm, JSON.stringify(user));
-            alert("تم التسجيل! سجل دخولك الآن");
-            toggleAuthMode();
+            alert("تم إنشاء الحساب بنجاح!"); toggleAuthMode();
         } else {
             let stored = JSON.parse(localStorage.getItem('u_'+nm));
-            if(stored && stored.ps === ps) { user = stored; loginSuccess(); }
-            else alert("خطأ في البيانات");
+            if(stored && stored.ps === ps) {
+                tempUser = stored;
+                if(stored.twoFA) {
+                    document.getElementById('twoFAModal').classList.add('show');
+                    document.getElementById('overlay').classList.add('show');
+                } else {
+                    loginSuccess(stored);
+                }
+            } else alert("خطأ في بيانات الدخول");
         }
     }
 
-    function loginSuccess() {
+    function verifyTwoFA() {
+        const code = document.getElementById('twoFAInput').value;
+        if(code === tempUser.twoFAPass) {
+            loginSuccess(tempUser);
+            closeModals();
+        } else alert("رمز التحقق خاطئ!");
+    }
+
+    function loginSuccess(userObj) {
+        currentUser = userObj;
         document.getElementById('authArea').classList.add('hidden');
         document.getElementById('mainContent').classList.remove('hidden');
-        document.getElementById('ham').style.display = 'block';
-        render();
+        document.getElementById('setBtn').classList.remove('hidden');
+        // تحديث حالة الإعدادات
+        document.getElementById('twoFAEnabled').checked = currentUser.twoFA;
+        renderNotes();
     }
 
-    function addCounter() {
-        const name = document.getElementById('newCName').value;
-        const target = parseInt(document.getElementById('newCTarget').value) || 0;
-        if(name) { user.counters.push({ name, count: 0, target: target }); save(); }
+    // --- نظام استعادة كلمة المرور ---
+    function openForgotModal() {
+        document.getElementById('forgotModal').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+        document.getElementById('forgotStep1').classList.remove('hidden');
+        document.getElementById('forgotStep2').classList.add('hidden');
     }
 
-    function updateCounter(i, amt) {
-        if(amt === -1 && user.counters[i].count <= 0) return;
-        user.counters[i].count += amt; save();
+    function checkUserForForgot() {
+        const nm = document.getElementById('forgotUser').value.trim();
+        let stored = JSON.parse(localStorage.getItem('u_'+nm));
+        if(stored && stored.sq) {
+            tempUser = stored;
+            document.getElementById('forgotStep1').classList.add('hidden');
+            document.getElementById('forgotStep2').classList.remove('hidden');
+            document.getElementById('displayQuestion').innerText = stored.sq;
+        } else alert("المستخدم غير موجود أو لم يضبط سؤال أمان");
     }
 
-    function resetCounter(i) {
-        showModal("تصفير العداد", "هل تريد التصفير؟", () => { user.counters[i].count = 0; save(); });
+    function verifySecurityAnswer() {
+        const ans = document.getElementById('forgotAnswer').value.trim();
+        if(ans === tempUser.sa) {
+            const newP = prompt("تم التحقق! أدخل كلمة المرور الجديدة:");
+            if(newP) {
+                tempUser.ps = newP;
+                localStorage.setItem('u_'+tempUser.nm, JSON.stringify(tempUser));
+                alert("تم تحديث كلمة المرور بنجاح");
+                closeModals();
+            }
+        } else alert("الإجابة غير صحيحة!");
     }
 
-    function deleteCounter(i) {
-        showModal("حذف العداد", "سيتم الحذف نهائياً، متأكد؟", () => { user.counters.splice(i, 1); save(); });
+    // --- الإعدادات ---
+    function toggleTwoFASetting() {
+        const isEnabled = document.getElementById('twoFAEnabled').checked;
+        const area = document.getElementById('twoFASetArea');
+        if(isEnabled) area.classList.remove('hidden');
+        else {
+            area.classList.add('hidden');
+            currentUser.twoFA = false;
+            saveUser();
+        }
     }
 
+    function saveTwoFAPass() {
+        const p = document.getElementById('twoFAPassSet').value;
+        if(p.length < 2) return alert("الرمز قصير جداً");
+        currentUser.twoFA = true;
+        currentUser.twoFAPass = p;
+        saveUser();
+        alert("تم تفعيل التحقق بخطوتين بنجاح");
+        document.getElementById('twoFASetArea').classList.add('hidden');
+    }
+
+    // --- الملاحظات ---
     function addNote() {
         const txt = document.getElementById('noteIn').value.trim();
         if(txt) {
-            if(!user.notes) user.notes = [];
-            user.notes.push({ id: Date.now(), txt: txt });
+            currentUser.notes.push({ id: Date.now(), txt: txt });
+            saveUser();
             document.getElementById('noteIn').value = "";
-            save(); 
         }
     }
 
     function deleteNote(id) {
-        showModal("حذف الملاحظة", "هل تريد حذف الملاحظة؟", () => {
-            user.notes = user.notes.filter(n => n.id !== id);
-            save();
-        });
+        if(confirm("هل أنت متأكد من الحذف؟")) {
+            currentUser.notes = currentUser.notes.filter(n => n.id !== id);
+            saveUser();
+        }
     }
 
-    function save() {
-        if(user) { localStorage.setItem('u_'+user.nm, JSON.stringify(user)); render(); }
+    function editNote(id) {
+        const idx = currentUser.notes.findIndex(n => n.id === id);
+        const newTxt = prompt("تعديل الملاحظة:", currentUser.notes[idx].txt);
+        if(newTxt !== null) {
+            currentUser.notes[idx].txt = newTxt;
+            saveUser();
+        }
     }
 
-    // الطريقة الأضمن لعرض النص كنص فقط
-    function render() {
-        if(!user) return;
-        
-        // رندر العدادات
-        const cl = document.getElementById('cList'); cl.innerHTML = "";
-        user.counters.forEach((c, i) => {
-            const isReached = c.target > 0 && c.count >= c.target;
-            const row = document.createElement('div');
-            row.className = `counter-row ${isReached ? 'reached' : ''}`;
-            row.innerHTML = `
-                <div class="c-header">
-                    <div><strong class="c-name"></strong> <button class="reset-btn" onclick="resetCounter(${i})">تصفير 🔄</button></div>
-                    <span style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</span>
-                </div>
-                <div class="c-main">
-                    <div class="c-controls">
-                        <button class="m-btn" onclick="updateCounter(${i}, 1)" style="background:var(--primary); color:white; border:none;">+</button>
-                        <span style="font-weight:bold; font-size:1.8rem; min-width:60px; text-align:center;">${c.count}</span>
-                        <button class="m-btn" onclick="updateCounter(${i}, -1)" ${c.count <= 0 ? 'disabled' : ''}>-</button>
-                    </div>
-                </div>
-            `;
-            row.querySelector('.c-name').textContent = c.name;
-            cl.appendChild(row);
-        });
+    function saveUser() {
+        localStorage.setItem('u_'+currentUser.nm, JSON.stringify(currentUser));
+        renderNotes();
+    }
 
-        // رندر الملاحظات - الحماية القصوى ضد تحول الكود
+    function renderNotes() {
         const nl = document.getElementById('nList'); nl.innerHTML = "";
-        (user.notes || []).forEach(n => {
-            const bubble = document.createElement('div');
-            bubble.className = 'note-bubble';
-            
-            // إنشاء عنصر النص واستخدام createTextNode لضمان عدم تشغيل أي كود
-            const textDiv = document.createElement('div');
-            textDiv.className = 'note-text';
-            textDiv.appendChild(document.createTextNode(n.txt)); 
-
-            const actionsDiv = document.createElement('div');
-            actionsDiv.className = 'note-actions';
-            actionsDiv.innerHTML = `
-                <span class="note-btn" onclick="navigator.clipboard.writeText(\`${n.txt.replace(/`/g, '\\`')}\`).then(()=>alert('تم النسخ'))">نسخ 📋</span>
-                <span class="note-btn" style="color:var(--danger);" onclick="deleteNote(${n.id})">حذف 🗑️</span>
+        currentUser.notes.forEach(n => {
+            const div = document.createElement('div');
+            div.className = 'note-bubble';
+            div.innerHTML = `
+                <div style="margin-bottom:10px">${document.createTextNode(n.txt).wholeText}</div>
+                <div class="note-actions">
+                    <span class="note-btn" onclick="editNote(${n.id})">✏️ تعديل</span>
+                    <span class="note-btn" style="color:var(--danger)" onclick="deleteNote(${n.id})">🗑️ حذف</span>
+                </div>
             `;
-
-            bubble.appendChild(textDiv);
-            bubble.appendChild(actionsDiv);
-            nl.appendChild(bubble);
+            nl.appendChild(div);
         });
     }
 
-    function logout() { location.reload(); }
+    function closeModals() {
+        document.querySelectorAll('.custom-modal').forEach(m => m.classList.remove('show'));
+        document.getElementById('overlay').classList.remove('show');
+    }
 </script>
 </body>
 </html>
