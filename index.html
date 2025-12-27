@@ -1,335 +1,270 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>برو داشبورد | أنور</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; --success: #10b981; --danger: #ef4444; }
-        [data-theme="light"] { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --border: #ddd; }
-        
-        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; }
-        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 2000; }
-        .menu-toggle { font-size: 28px; cursor: pointer; color: var(--primary); display: none; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>برو داشبورد | أنور</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #6366f1; --bg: #111827; --card: #1f2937; --text: #f9fafb; --border: #374151; }
+        [data-theme="light"] { --bg: #f3f4f6; --card: #ffffff; --text: #1f2937; --border: #ddd; }
+        
+        body { font-family: 'Cairo', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; transition: 0.3s; overflow-x: hidden; }
+        header { background: var(--card); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 2000; }
+        .menu-toggle { font-size: 28px; cursor: pointer; color: var(--primary); display: none; }
 
-        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--card); transition: 0.4s ease; z-index: 2500; padding-top: 80px; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
-        .sidebar.open { right: 0; }
-        .sidebar-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; font-weight: bold; }
+        .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: var(--card); transition: 0.4s ease; z-index: 2500; padding-top: 80px; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+        .sidebar.open { right: 0; }
+        .sidebar-item { padding: 15px 25px; cursor: pointer; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 15px; font-weight: bold; }
 
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; z-index: 2400; backdrop-filter: blur(4px); }
-        .overlay.show { display: block; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; z-index: 2400; }
+        .overlay.show { display: block; }
 
-        /* ستايل النافذة المنبثقة المخصصة */
-        .custom-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); background: var(--card); padding: 25px; border-radius: 20px; z-index: 3000; width: 90%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: none; opacity: 0; transition: 0.3s; border: 1px solid var(--border); }
-        .custom-modal.show { display: block; opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .m-confirm { background: var(--danger); color: white; border: none; padding: 10px; flex: 1; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .m-cancel { background: var(--border); color: var(--text); border: none; padding: 10px; flex: 1; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        .section { display: none; width: 95%; max-width: 500px; margin: 20px auto; }
+        .section.active { display: block; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
+        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; }
+        
+        /* العدادات */
+        .counter-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 5px solid var(--primary); }
+        .c-controls { display: flex; align-items: center; gap: 10px; }
+        .m-btn { width: 40px; height: 40px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 10px; font-size: 1.5rem; font-weight: bold; cursor: pointer; }
+        .m-btn:disabled { opacity: 0.3; }
+        
+        /* الملاحظات */
+        .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
+        .note-text { margin-bottom: 10px; white-space: pre-wrap; line-height: 1.6; }
+        .note-actions { display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid var(--border); padding-top: 10px; }
+        .note-btn { font-size: 0.8rem; cursor: pointer; padding: 5px 10px; border-radius: 5px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
 
-        .section { display: none; width: 95%; max-width: 500px; margin: 20px auto; }
-        .section.active { display: block; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: 'Cairo'; box-sizing: border-box; }
-        .btn { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        
-        .counter-row { display: flex; flex-direction: column; background: var(--card); padding: 18px; border-radius: 15px; margin-bottom: 12px; border: 1px solid var(--border); border-right: 6px solid var(--primary); }
-        .counter-row.reached { border-right-color: var(--success); background: rgba(16, 185, 129, 0.08); border-color: var(--success); }
-        
-        .c-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .c-main { display: flex; justify-content: space-between; align-items: center; }
-        .c-controls { display: flex; align-items: center; gap: 12px; }
-        
-        .m-btn { width: 50px; height: 50px; background: #fff; color: #000; border: 1px solid #ddd; border-radius: 12px; font-size: 1.6rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .reset-btn { font-size: 0.75rem; background: #9ca3af; color: white; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; margin-right: 10px; }
-
-        .note-bubble { background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid var(--border); }
-        .note-text { margin-bottom: 10px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
-        .note-actions { display: flex; gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; }
-        .note-btn { font-size: 0.75rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: var(--text); }
-        
-        .hidden { display: none !important; }
-        .link { color: var(--primary); cursor: pointer; font-weight: bold; }
-    </style>
+        .hidden { display: none !important; }
+        .link { color: var(--primary); cursor: pointer; font-weight: bold; font-size: 0.85rem; }
+    </style>
 </head>
 <body>
 
-<div class="overlay" id="overlay" onclick="closeModal()"></div>
-<div class="custom-modal" id="customModal">
-    <h3 id="modalTitle">تأكيد الحذف</h3>
-    <p id="modalMsg">هل أنت متأكد من رغبتك في الحذف؟</p>
-    <div class="modal-btns">
-        <button class="m-confirm" id="modalConfirmBtn">نعم، حذف</button>
-        <button class="m-cancel" onclick="closeModal()">إلغاء</button>
-    </div>
-</div>
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
 <header>
-    <div id="ham" class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <div style="font-weight: 900; color: var(--primary); font-size: 1.2rem;">PRO DASHBOARD</div>
-    <div onclick="toggleDark()" style="cursor:pointer; font-size: 24px;">🌓</div>
+    <div id="ham" class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <div style="font-weight: 900; color: var(--primary); font-size: 1.2rem;">PRO DASHBOARD</div>
+    <div onclick="toggleDark()" style="cursor:pointer; font-size: 24px;">🌓</div>
 </header>
 
 <nav class="sidebar" id="sidebar">
-    <div class="sidebar-item" onclick="showTab('home')">🏠 العدادات</div>
-    <div class="sidebar-item" onclick="showTab('notes')">📝 الملاحظات</div>
-    <div class="sidebar-item" onclick="showTab('settings')">⚙️ الإعدادات</div>
-    <div class="sidebar-item" style="color:red; margin-top:50px" onclick="logout()">🚪 خروج</div>
+    <div class="sidebar-item" onclick="showTab('home')">🏠 العدادات</div>
+    <div class="sidebar-item" onclick="showTab('notes')">📝 الملاحظات</div>
+    <div class="sidebar-item" onclick="showTab('settings')">⚙️ الإعدادات</div>
+    <div class="sidebar-item" style="color:red; margin-top:50px" onclick="logout()">🚪 خروج</div>
 </nav>
 
-<div id="appArea">
-    <div id="authArea" class="section active">
-        <div class="card">
-            <h2 id="authTitle" style="text-align: center;">تسجيل الدخول</h2>
-            <input type="text" id="userIn" placeholder="اسم المستخدم">
-            <input type="password" id="passIn" placeholder="كلمة المرور">
-            <button class="btn" id="mainAuthBtn" onclick="handleAuth()">دخول</button>
-            <div style="text-align: center; margin-top:15px;">
-                <span class="link" onclick="toggleAuthMode()" id="toggleLink">إنشاء حساب جديد</span>
-            </div>
-        </div>
-    </div>
+<div id="authArea" class="section active" style="margin-top: 50px;">
+    <div class="card">
+        <h2 id="authTitle" style="text-align: center;">تسجيل الدخول</h2>
+        <input type="text" id="userIn" placeholder="اسم المستخدم">
+        <div id="regExtra" class="hidden"><input type="email" id="emailIn" placeholder="البريد الإلكتروني"></div>
+        <input type="password" id="passIn" placeholder="كلمة المرور">
+        <button class="btn" id="mainAuthBtn" onclick="handleAuth()">دخول</button>
+        <div style="display:flex; justify-content:space-between; margin-top:15px;">
+            <span class="link" onclick="toggleAuthMode()" id="toggleLink">إنشاء حساب جديد</span>
+            <span class="link" onclick="forgotPass()">نسيت كلمة المرور؟</span>
+        </div>
+    </div>
+</div>
 
-    <div id="mainContent" class="hidden">
-        <div id="homeSec" class="section active">
-            <div class="card">
-                <h3>➕ إضافة عداد جديد</h3>
-                <input type="text" id="newCName" placeholder="اسم العداد">
-                <input type="number" id="newCTarget" placeholder="الهدف (اختياري)">
-                <button class="btn" onclick="addCounter()">حفظ العداد</button>
-            </div>
-            <div id="cList"></div>
-        </div>
+<div id="appArea" class="hidden">
+    <div id="homeSec" class="section">
+        <div class="card">
+            <input type="text" id="newCName" placeholder="اسم العداد الجديد...">
+            <button class="btn" onclick="addCounter()">+ إضافة عداد</button>
+        </div>
+        <div id="cList"></div>
+    </div>
 
-        <div id="notesSec" class="section">
-            <div class="card">
-                <h3>📝 الملاحظات</h3>
-                <textarea id="noteIn" placeholder="اكتب ملاحظة..." rows="3"></textarea>
-                <button class="btn" onclick="addNote()">حفظ</button>
-            </div>
-            <div id="nList"></div>
-        </div>
+    <div id="notesSec" class="section">
+        <div class="card">
+            <h3>📝 شات الملاحظات</h3>
+            <textarea id="noteIn" placeholder="اكتب ملاحظة هنا..." rows="3"></textarea>
+            <button class="btn" onclick="addNote()">حفظ في الملاحظات</button>
+        </div>
+        <div id="nList"></div>
+    </div>
 
-        <div id="settingsSec" class="section">
-            <div class="card">
-                <h3>⚙️ الإعدادات</h3>
-                <button class="btn" onclick="logout()" style="background: #ef4444;">تسجيل الخروج</button>
-            </div>
-        </div>
-    </div>
+    <div id="settingsSec" class="section">
+        <div class="card">
+            <h3>⚙️ إعدادات الحساب</h3>
+            <input type="text" id="set_nm" placeholder="اليوزر الجديد">
+            <button class="btn" onclick="updateSetting('nm')">تحديث اليوزر</button>
+            <input type="email" id="set_em" placeholder="الإيميل الجديد">
+            <button class="btn" onclick="updateSetting('em')">تحديث الإيميل</button>
+            <input type="password" id="set_ps" placeholder="الباسوورد الجديد">
+            <button class="btn" onclick="updateSetting('ps')">تحديث الباسوورد</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    let user = null;
-    let pendingAction = null; // لتخزين الوظيفة التي ستنفذ عند التأكيد
+    let user = null;
+    let isRegMode = false;
 
-    function toggleMenu() {
-        document.getElementById('sidebar').classList.toggle('open');
-        document.getElementById('overlay').classList.toggle('show');
-    }
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('show');
+    }
 
-    // وظائف النافذة المنبثقة المخصصة
-    function showModal(title, msg, onConfirm) {
-        document.getElementById('modalTitle').innerText = title;
-        document.getElementById('modalMsg').innerText = msg;
-        document.getElementById('overlay').classList.add('show');
-        document.getElementById('customModal').classList.add('show');
-        
-        document.getElementById('modalConfirmBtn').onclick = function() {
-            onConfirm();
-            closeModal();
-        };
-    }
+    function toggleDark() {
+        const b = document.body;
+        b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+    }
 
-    function closeModal() {
-        document.getElementById('overlay').classList.remove('show');
-        document.getElementById('customModal').classList.remove('show');
-        document.getElementById('sidebar').classList.remove('open');
-    }
+    function showTab(t) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(t + 'Sec').classList.add('active');
+        if(t === 'settings' && user) {
+            document.getElementById('set_nm').value = user.nm;
+            document.getElementById('set_em').value = user.em || "";
+        }
+        if (document.getElementById('sidebar').classList.contains('open')) toggleMenu();
+    }
 
-    function toggleDark() {
-        const b = document.body;
-        b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-    }
+    function toggleAuthMode() {
+        isRegMode = !isRegMode;
+        document.getElementById('authTitle').innerText = isRegMode ? "حساب جديد" : "تسجيل الدخول";
+        document.getElementById('mainAuthBtn').innerText = isRegMode ? "تسجيل" : "دخول";
+        document.getElementById('regExtra').classList.toggle('hidden', !isRegMode);
+    }
 
-    function showTab(t) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(t + 'Sec').classList.add('active');
-        if (document.getElementById('sidebar').classList.contains('open')) closeModal();
-    }
+    function handleAuth() {
+        const nm = document.getElementById('userIn').value.trim();
+        const ps = document.getElementById('passIn').value.trim();
+        const em = document.getElementById('emailIn').value.trim();
+        if(!nm || !ps) return alert("أكمل البيانات");
 
-    function toggleAuthMode() {
-        const title = document.getElementById('authTitle');
-        const btn = document.getElementById('mainAuthBtn');
-        if(title.innerText === "تسجيل الدخول") {
-            title.innerText = "حساب جديد";
-            btn.innerText = "تسجيل";
-        } else {
-            title.innerText = "تسجيل الدخول";
-            btn.innerText = "دخول";
-        }
-    }
+        if(isRegMode) {
+            if(localStorage.getItem('u_'+nm)) return alert("اليوزر موجود");
+            user = { nm, ps, em, counters: [], notes: [] };
+            localStorage.setItem('u_'+nm, JSON.stringify(user));
+            alert("تم التسجيل! يمكنك الدخول الآن"); toggleAuthMode();
+        } else {
+            let stored = JSON.parse(localStorage.getItem('u_'+nm));
+            if(stored && stored.ps === ps) { user = stored; loginSuccess(); }
+            else alert("خطأ في البيانات");
+        }
+    }
 
-    function handleAuth() {
-        const nm = document.getElementById('userIn').value.trim();
-        const ps = document.getElementById('passIn').value.trim();
-        if(!nm || !ps) return alert("أكمل البيانات");
+    function loginSuccess() {
+        document.getElementById('authArea').classList.add('hidden');
+        document.getElementById('appArea').classList.remove('hidden');
+        document.getElementById('ham').style.display = 'block';
+        showTab('home');
+        render();
+    }
 
-        const isReg = document.getElementById('authTitle').innerText === "حساب جديد";
+    function addCounter() {
+        const name = document.getElementById('newCName').value;
+        if(name) { user.counters.push({ name, count: 0 }); save(); document.getElementById('newCName').value = ""; }
+    }
 
-        if(isReg) {
-            if(localStorage.getItem('u_'+nm)) return alert("اليوزر موجود");
-            user = { nm, ps, counters: [], notes: [] };
-            save();
-            alert("تم التسجيل! سجل دخولك الآن");
-            toggleAuthMode();
-        } else {
-            let stored = JSON.parse(localStorage.getItem('u_'+nm));
-            if(stored && stored.ps === ps) { user = stored; loginSuccess(); }
-            else alert("خطأ في البيانات");
-        }
-    }
+    function updateCounter(i, amt) {
+        if(amt === -1 && user.counters[i].count <= 0) return;
+        user.counters[i].count += amt;
+        save();
+    }
 
-    function loginSuccess() {
-        document.getElementById('authArea').classList.add('hidden');
-        document.getElementById('mainContent').classList.remove('hidden');
-        document.getElementById('ham').style.display = 'block';
-        render();
-    }
+    function deleteCounter(i) {
+        if(confirm("حذف العداد؟")) { user.counters.splice(i, 1); save(); }
+    }
 
-    function addCounter() {
-        const name = document.getElementById('newCName').value;
-        const target = parseInt(document.getElementById('newCTarget').value) || 0;
-        if(name) { 
-            user.counters.push({ name, count: 0, target: target }); 
-            save(); 
-            document.getElementById('newCName').value = "";
-            document.getElementById('newCTarget').value = "";
-        }
-    }
+    // وظيفة إضافة الملاحظات (المصلحة)
+    function addNote() {
+        const txt = document.getElementById('noteIn').value.trim();
+        if(txt) {
+            if(!user.notes) user.notes = [];
+            user.notes.push({ id: Date.now(), txt: txt });
+            save(); 
+            document.getElementById('noteIn').value = ""; 
+        }
+    }
 
-    function updateCounter(i, amt) {
-        if(amt === -1 && user.counters[i].count <= 0) return;
-        user.counters[i].count += amt;
-        save();
-    }
+    function deleteNote(id) {
+        if(confirm("حذف هذه الملاحظة؟")) {
+            user.notes = user.notes.filter(n => n.id !== id);
+            save();
+        }
+    }
 
-    function resetCounter(i) {
-        showModal("تصفير العداد", "هل تريد إعادة العداد إلى صفر؟", () => {
-            user.counters[i].count = 0;
-            save();
-        });
-    }
+    function editNote(id) {
+        const note = user.notes.find(n => n.id === id);
+        const newTxt = prompt("تعديل الملاحظة:", note.txt);
+        if(newTxt !== null && newTxt.trim() !== "") {
+            note.txt = newTxt;
+            save();
+        }
+    }
 
-    function deleteCounter(i) {
-        showModal("حذف العداد", "سيتم حذف العداد نهائياً، هل أنت متأكد؟", () => {
-            user.counters.splice(i, 1);
-            save();
-        });
-    }
+    function save() {
+        if(user) {
+            localStorage.setItem('u_'+user.nm, JSON.stringify(user));
+            render();
+        }
+    }
 
-    function addNote() {
-        const txt = document.getElementById('noteIn').value.trim();
-        if(txt) {
-            if(!user.notes) user.notes = [];
-            user.notes.push({ id: Date.now(), txt: txt });
-            save(); 
-            document.getElementById('noteIn').value = ""; 
-        }
-    }
+    function render() {
+        if(!user) return;
+        
+        // رندر العدادات
+        const cl = document.getElementById('cList'); cl.innerHTML = "";
+        user.counters.forEach((c, i) => {
+            cl.innerHTML += `<div class="counter-row">
+                <div style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</div>
+                <div style="font-weight:bold; flex:1; text-align:right; margin-right:15px;">${c.name}</div>
+                <div class="c-controls">
+                    <button class="m-btn" onclick="updateCounter(${i}, 1)">+</button>
+                    <span style="font-weight:bold; font-size:1.3rem; min-width:30px; text-align:center;">${c.count}</span>
+                    <button class="m-btn" onclick="updateCounter(${i}, -1)" ${c.count <= 0 ? 'disabled' : ''}>-</button>
+                </div>
+            </div>`;
+        });
 
-    function deleteNote(id) {
-        showModal("حذف الملاحظة", "هل تريد حذف هذه الملاحظة؟", () => {
-            user.notes = user.notes.filter(n => n.id !== id);
-            save();
-        });
-    }
+        // رندر الملاحظات
+        const nl = document.getElementById('nList'); nl.innerHTML = "";
+        const notesToShow = user.notes || [];
+        notesToShow.forEach(n => {
+            nl.innerHTML += `<div class="note-bubble">
+                <div class="note-text">${n.txt}</div>
+                <div class="note-actions">
+                    <span class="note-btn" onclick="copyText(\`${n.txt.replace(/`/g, '\\`')}\`)">نسخ 📋</span>
+                    <span class="note-btn" onclick="editNote(${n.id})">تعديل ✏️</span>
+                    <span class="note-btn" style="color:red;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
+                </div>
+            </div>`;
+        });
+    }
 
-    function copyNote(txt) {
-        navigator.clipboard.writeText(txt).then(() => alert("تم النسخ ✅"));
-    }
+    function copyText(t) {
+        navigator.clipboard.writeText(t);
+        alert('تم النسخ بنجاح');
+    }
 
-    function enableEdit(id) {
-        document.getElementById(`text-box-${id}`).classList.add('hidden');
-        document.getElementById(`edit-ctrl-${id}`).classList.remove('hidden');
-    }
+    function logout() { location.reload(); }
 
-    function saveEdit(id) {
-        const newTxt = document.getElementById(`input-${id}`).value.trim();
-        if(newTxt) {
-            const index = user.notes.findIndex(n => n.id == id);
-            user.notes[index].txt = newTxt;
-            save();
-        }
-    }
+    function updateSetting(type) {
+        const v = document.getElementById('set_'+type).value;
+        if(!v) return;
+        if(type === 'nm') { localStorage.removeItem('u_'+user.nm); user.nm = v; }
+        else if(type === 'em') user.em = v;
+        else if(type === 'ps') user.ps = v;
+        save(); alert("تم التحديث");
+    }
 
-    function save() {
-        if(user) {
-            localStorage.setItem('u_'+user.nm, JSON.stringify(user));
-            render();
-        }
-    }
-
-    function render() {
-        if(!user) return;
-        
-        const cl = document.getElementById('cList'); cl.innerHTML = "";
-        user.counters.forEach((c, i) => {
-            const isReached = c.target > 0 && c.count >= c.target;
-            const row = document.createElement('div');
-            row.className = `counter-row ${isReached ? 'reached' : ''}`;
-            
-            row.innerHTML = `
-                <div class="c-header">
-                    <div>
-                        <strong class="c-name"></strong>
-                        <button class="reset-btn" onclick="resetCounter(${i})">تصفير 🔄</button>
-                    </div>
-                    <span style="color:red; cursor:pointer;" onclick="deleteCounter(${i})">🗑️</span>
-                </div>
-                <div class="c-main">
-                    <div class="c-controls">
-                        <button class="m-btn" onclick="updateCounter(${i}, 1)" style="background:var(--primary); color:white; border:none;">+</button>
-                        <span style="font-weight:bold; font-size:1.8rem; min-width:60px; text-align:center;">${c.count}</span>
-                        <button class="m-btn" onclick="updateCounter(${i}, -1)" ${c.count <= 0 ? 'disabled' : ''}>-</button>
-                    </div>
-                    <div style="font-size:0.7rem; color:#888;">الهدف: ${c.target || 'بلا'}</div>
-                </div>
-                <div class="remaining-text" style="font-size:0.85rem; font-weight:bold; margin-top:8px; color:var(--primary);">
-                    ${c.target > 0 ? (isReached ? '🌟 تم الوصول!' : 'باقي لك ' + (c.target - c.count)) : ''}
-                </div>
-            `;
-            row.querySelector('.c-name').textContent = c.name;
-            cl.appendChild(row);
-        });
-
-        const nl = document.getElementById('nList'); nl.innerHTML = "";
-        (user.notes || []).forEach(n => {
-            const bubble = document.createElement('div');
-            bubble.className = 'note-bubble';
-            bubble.innerHTML = `
-                <div id="text-box-${n.id}">
-                    <div class="note-text" id="content-${n.id}"></div>
-                    <div class="note-actions">
-                        <span class="note-btn copy-btn">نسخ 📋</span>
-                        <span class="note-btn" onclick="enableEdit('${n.id}')">تعديل ✏️</span>
-                        <span class="note-btn" style="color:#ef4444;" onclick="deleteNote(${n.id})">حذف 🗑️</span>
-                    </div>
-                </div>
-                <div id="edit-ctrl-${n.id}" class="hidden">
-                    <textarea id="input-${n.id}" class="edit-area" rows="3"></textarea>
-                    <button class="btn" style="padding:8px;" onclick="saveEdit('${n.id}')">حفظ التعديل</button>
-                </div>
-            `;
-            bubble.querySelector(`#content-${n.id}`).textContent = n.txt;
-            bubble.querySelector(`#input-${n.id}`).value = n.txt;
-            bubble.querySelector('.copy-btn').onclick = () => copyNote(n.txt);
-            nl.appendChild(bubble);
-        });
-    }
-
-    function logout() { location.reload(); }
+    function forgotPass() {
+        const nm = prompt("اسم المستخدم؟");
+        let s = JSON.parse(localStorage.getItem('u_'+nm));
+        if(s) alert("كلمة المرور: " + s.ps);
+        else alert("غير موجود");
+    }
 </script>
 </body>
 </html>
